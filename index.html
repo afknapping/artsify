@@ -13,9 +13,7 @@
 <!-- Fonts: UI + Mono for filenames -->
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Atkinson Hyperlegible Next (UI) -->
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Attempt to load a mono companion; fallback to system monospace if unavailable -->
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next+Mono:wght@700&display=swap" rel="stylesheet">
 
 <style>
@@ -44,8 +42,7 @@
   .progress { margin-top:14px; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; overflow:hidden; height:10px; }
   .bar { height:100%; width:0%; background:linear-gradient(90deg,#62d0ff,#8ef0b3); transition:width .2s ease; }
   #progressWrap { display:none; }
-  #log { margin-top:12px; white-space:pre-wrap; max-height:220px; overflow:auto; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; padding:10px; display:none; }
-  /* Filenames in mono bold */
+  #log[data-test="console"] { margin-top:12px; white-space:pre-wrap; max-height:220px; overflow:auto; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; padding:10px; display:none; }
   #log .fname, .thumb .cap { font-family:"Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; color:#fff; }
 
   /* Upload */
@@ -65,7 +62,7 @@
 
   /* Gallery */
   #previewSection { display:none; }
-  #gallery { margin-top:16px; display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
+  #gallery[data-test="gallery"] { margin-top:16px; display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
   .thumb { border:1px solid #2a2f38; border-radius:10px; overflow:hidden; background:#0f1216; display:flex; flex-direction:column; }
   .thumb .box { width:100%; aspect-ratio: 1 / 1; overflow:hidden; background:#0b0c10; }
   .thumb .box button.open { all:unset; display:block; width:100%; height:100%; cursor:pointer; }
@@ -136,7 +133,7 @@
         </div>
 
         <!-- Unified dropzone -->
-        <div id="drop" class="dropzone">
+        <div id="drop" class="dropzone" data-test="dropzone">
           Click or drop files here<br>
           <small class="muted">Images or ZIP. On desktop you can also choose a whole folder.</small>
         </div>
@@ -148,40 +145,40 @@
         </div>
 
         <!-- Hidden inputs -->
-        <input id="filesInput" type="file" accept="image/*,.zip" multiple style="display:none" />
-        <input id="folderInput" type="file" webkitdirectory multiple style="display:none" />
+        <input id="filesInput" type="file" accept="image/*,.zip" multiple style="display:none" data-test="files-input" />
+        <input id="folderInput" type="file" webkitdirectory multiple style="display:none" data-test="folder-input" />
       </div>
 
       <!-- Progress + Console -->
       <div id="progressWrap" class="progress"><div class="bar" id="bar"></div></div>
-      <div id="log" aria-live="polite"></div>
+      <div id="log" aria-live="polite" data-test="console"></div>
 
-      <!-- Start button now UNDER the console -->
+      <!-- Start button under console -->
       <div class="row-right" style="margin-top:10px">
-        <button id="start" class="btn primary" style="display:none">Start</button>
+        <button id="start" class="btn primary" style="display:none" data-test="start">Start</button>
       </div>
     </section>
 
-    <section id="previewSection" class="card">
+    <section id="previewSection" class="card" style="display:none">
       <h3 style="margin-top:0">Previews</h3>
-      <div id="gallery"></div>
+      <div id="gallery" data-test="gallery"></div>
     </section>
   </main>
 
   <footer id="dlbar" style="display:none">
-    <a id="dllink" class="download">Download ZIP with all images</a>
+    <a id="dllink" class="download" data-test="download">Download ZIP with all images</a>
   </footer>
 
   <!-- Lightbox -->
-  <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
+  <div id="lightbox" class="lightbox" aria-modal="true" role="dialog" data-test="lightbox">
     <div class="lb-stage">
-      <button class="lb-close" title="Close" aria-label="Close">&times;</button>
+      <button class="lb-close" title="Close" aria-label="Close" data-test="lb-close">&times;</button>
       <div class="lb-viewport">
         <img class="lb-img" alt="Preview"/>
       </div>
       <div class="lb-cap"></div>
-      <button class="lb-prev" title="Previous" aria-label="Previous">&#10094;</button>
-      <button class="lb-next" title="Next" aria-label="Next">&#10095;</button>
+      <button class="lb-prev" title="Previous" aria-label="Previous" data-test="lb-prev">&#10094;</button>
+      <button class="lb-next" title="Next" aria-label="Next" data-test="lb-next">&#10095;</button>
     </div>
   </div>
 
@@ -193,6 +190,7 @@
     window.Magick = Magick;
   </script>
 
+  <!-- App Script -->
   <script>
   (function(){
     const logEl = document.getElementById('log');
@@ -408,7 +406,6 @@
     }
 
     async function handleFileList(list,{logContext}={}){
-      // Clear console (and previews) once if we just finished a run and are adding fresh files:
       if (needClearOnNextQueue) { clearLog(); clearPreviewsUI(); needClearOnNextQueue = false; }
 
       let imagesAdded = 0, zips = 0, zipsAdded = 0;
@@ -450,7 +447,7 @@
       cvs.width=w;cvs.height=h;
       const ctx2=cvs.getContext('2d');
       ctx2.font=fontSpec; ctx2.fillStyle='#000'; ctx2.textBaseline='middle'; ctx2.fillText(text,0,Math.round(h/2));
-      return new Promise(r=>cvs.toBlob(b=>r({blob:b,width:w,height:h}),'image/png'));
+      return new Promise(r=>cvs.toBlob(b=>r({blob:b,width:h>0?w:1,height:h>0?h:1}),'image/png'));
     }
     async function getDateTakenWithSource(fileLike){
       try{
@@ -547,7 +544,7 @@
       const index = previewItems.push({ url, name: of.name, caption }) - 1;
       btn.addEventListener('click', () => openLightbox(index));
 
-      // SUCCESS LOG (filenames in mono bold)
+      // SUCCESS LOG
       println(`✔ <span class="fname">${sanitizeBase(name)}</span> → <span class="fname">${of.name}</span>  [${rw}x${rh}, border ${borderPx}px, label "${label}", src=${dateSrc}]`,'var(--ok)');
 
       setProgress(i+1,total);
@@ -671,6 +668,187 @@
         updateStartVisibility(); // will stay hidden until new files are queued
       }
     });
+
+    // Expose minimal read-only hooks for tests (only if test mode)
+    if (/\btest=1\b/.test(location.search) || location.hash.includes('#test')) {
+      window.__app = Object.freeze({
+        get queueSize(){ return queuedFiles.length; },
+        get isProcessing(){ return processing; },
+        get previews(){ return previewItems.slice(); },
+        clearPreviewsUI, clearLog
+      });
+    }
+  })();
+  </script>
+
+  <!-- ======= Embedded Test Harness (optional via ?test=1 or #test) ======= -->
+  <script>
+  (function(){
+    const params = new URLSearchParams(location.search);
+    const hashIsTest = location.hash.includes('#test');
+    const isTest = params.get('test') === '1' || hashIsTest;
+    if (!isTest) return;
+
+    const suitesFilter = (params.get('suite')||'').split(',').map(s=>s.trim()).filter(Boolean); // e.g. queue,processing
+    const useMocks = params.get('mocks') !== '0'; // default true
+    const sleepBase = +(params.get('sleep')||'50'); // default 50ms
+    const helpText = `
+Usage:
+  ?test=1                        Run all suites with mocks
+  ?test=1&suite=queue,processing Run only selected suites (comma-separated)
+  ?test=1&mocks=0                Disable mocks (use real libs for integration)
+  ?test=1&sleep=0                Faster tests (reduce waits)
+
+Examples:
+  # Run all with mocks
+  https://example.com/index.html?test=1
+  # Only lightbox suite, with real libs
+  https://example.com/index.html?test=1&suite=lightbox&mocks=0
+`.trim();
+
+    /* Reporter styles */
+    const css = `
+    #__test { position: fixed; right: 10px; bottom: 10px; left: 10px; max-height: 40vh;
+      overflow: auto; background: #0f1216; color: #dbe2ea; border: 1px solid #2a2f38; 
+      border-radius: 10px; padding: 10px; font: 13px/1.5 "Atkinson Hyperlegible Next", sans-serif; z-index: 99999; }
+    #__test .ok { color: #5bd67a; } #__test .fail { color: #ff6b6b; }
+    #__test .sum { margin: 6px 0; } #__test h3 { margin: 6px 0; } #__test pre { white-space: pre-wrap; }
+    #__test .suite { margin-top:8px; font-weight:700; color:#8ef0b3; }
+    `;
+    const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+
+    /* Reporter */
+    const div = document.createElement('div'); div.id = '__test';
+    div.innerHTML = '<h3>Test Runner</h3><div class="sum"></div><div class="out"></div><pre class="help"></pre>';
+    document.body.appendChild(div);
+    const out = div.querySelector('.out'), sum = div.querySelector('.sum'), help = div.querySelector('.help');
+    let pass=0, fail=0, total=0;
+
+    function log(html, cls){ const p=document.createElement('div'); if(cls) p.className=cls; p.innerHTML=html; out.appendChild(p); }
+    function summary(){ sum.innerHTML = `Total: ${total} — <span class="ok">Passed: ${pass}</span> — <span class="fail">Failed: ${fail}</span>`; }
+    function assert(cond, msg){ total++; if(cond){ pass++; log('✔ ' + msg, 'ok'); } else { fail++; log('✖ ' + msg, 'fail'); } summary(); }
+    const ok = (v,msg)=>assert(!!v, msg||'ok');
+    const equal = (a,b,msg)=>assert(Object.is(a,b), (msg||'equal') + ` (got: ${a}, expect: ${b})`);
+    const sleep = (ms)=> new Promise(r=>setTimeout(r,ms));
+
+    const t$ = (name) => document.querySelector(`[data-test="${name}"]`);
+
+    /* Suite registry */
+    const tests = [];
+    function suite(name, fn){ tests.push({name, fn}); }
+    function wantSuite(name){ return suitesFilter.length ? suitesFilter.includes(name) : true; }
+
+    /* ---- Mocks (optional) ---- */
+    (function maybeInstallMocks(){
+      if (!useMocks) return;
+      const real = {
+        Magick: window.Magick,
+        exifr: window.exifr,
+        fflate: window.fflate,
+        createImageBitmap: window.createImageBitmap,
+        URLcreateObjectURL: URL.createObjectURL,
+        URLrevokeObjectURL: URL.revokeObjectURL,
+      };
+      window.__mocksReal = real;
+
+      function base64ToU8(b64){ const bin=atob(b64); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+      const PNG_1x1 = base64ToU8('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO0i7lwAAAAASUVORK5CYII=');
+      const JPG_1x1 = base64ToU8('/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQEBAQEA8QEA8QEA8QEA8QEA8QEA8QFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGxAQGi0fHy AtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAAEAAQMBIgACEQEDEQH/xAAXAAEBAQEAAAAAAAAAAAAAAAAAAQID/8QAFhABAQEAAAAAAAAAAAAAAAAAABEh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCXAAf/2Q==');
+
+      window.exifr = { parse: async (file) => {
+        if ((file.name||'').includes('noexif')) return {};
+        return { DateTimeOriginal: new Date('2025-08-23T12:34:56Z') };
+      }};
+
+      window.createImageBitmap = async () => ({ width: 2000, height: 1000, close: ()=>{} });
+
+      window.fflate = {
+        unzipSync(){ return { 'imgA.jpg': JPG_1x1, 'notes.txt': new Uint8Array([1,2,3]), '__MACOSX/._junk': new Uint8Array([0]), 'dir/imgB.png': PNG_1x1 }; },
+        zipSync(dict){ let len=0; for(const k in dict) len+=dict[k].length; return new Uint8Array(len||10); }
+      };
+
+      // Add a short delay so progress bar stays visible during assertions
+      window.Magick = { Call: async (inputs,args)=>{
+        await new Promise(r=>setTimeout(r,120)); // <-- ensures visible "processing"
+        return [{ name: args[args.length-1], content: inputs[0].content }];
+      } };
+
+      let counter=0;
+      URL.createObjectURL = () => `blob:mock://${++counter}`;
+      URL.revokeObjectURL = () => {};
+    })();
+
+    /* ---------- Test Suites ---------- */
+    suite('presence', async ()=>{
+      ok(t$('dropzone'), 'dropzone exists');
+      ok(t$('start'), 'start button exists');
+      ok(t$('console'), 'console exists');
+      equal(t$('start').style.display, 'none', 'start hidden initially');
+    });
+
+    suite('queue', async ()=>{
+      const filesInput = t$('files-input');
+      // Simulate picker with two images
+      const JPG_1 = new File([new Uint8Array([1,2,3])], 'cam001.jpg', {type:'image/jpeg', lastModified: 1724412345000});
+      const PNG_1 = new File([new Uint8Array([4,5,6])], 'noexif.png', {type:'image/png', lastModified: 1724310000000});
+      Object.defineProperty(filesInput, 'files', { value: [JPG_1, PNG_1], configurable: true });
+      filesInput.dispatchEvent(new Event('change', {bubbles:true}));
+      await sleep(sleepBase);
+      ok(t$('start').style.display !== 'none', 'start shows with queue');
+    });
+
+    suite('processing', async ()=>{
+      t$('start').click();
+      await sleep(sleepBase); // after click, progress should be shown
+      equal(t$('start').style.display, 'none', 'start hidden while processing');
+      ok(document.getElementById('progressWrap').style.display !== 'none', 'progress visible');
+      await sleep(sleepBase*3);
+      ok(t$('download').textContent === 'Download image' || t$('download').textContent.includes('Download ZIP'), 'download ready');
+      ok(document.getElementById('previewSection').style.display !== 'none', 'previews visible');
+    });
+
+    suite('lightbox', async ()=>{
+      const firstBtn = document.querySelector('#gallery .thumb .box button.open');
+      ok(firstBtn, 'first preview button exists');
+      firstBtn.click();
+      await sleep(sleepBase);
+      ok(t$('lightbox').classList.contains('show'), 'lightbox opens');
+      t$('lb-next').click(); t$('lb-prev').click();
+      t$('lb-close').click();
+      await sleep(sleepBase);
+      ok(!t$('lightbox').classList.contains('show'), 'lightbox closes');
+    });
+
+    suite('postrun-refresh', async ()=>{
+      const filesInput = t$('files-input');
+      const prevLogLen = t$('console').textContent.length;
+      // Add a ZIP file (mock unzip has 2 images)
+      const zip = new File([new Uint8Array([9,9,9])], 'batch.zip', {type:'application/zip'});
+      Object.defineProperty(filesInput, 'files', { value: [zip], configurable: true });
+      filesInput.dispatchEvent(new Event('change', {bubbles:true}));
+      await sleep(sleepBase*2);
+      ok(t$('console').textContent.length <= prevLogLen || t$('console').style.display === 'block', 'console refreshed for new queue');
+
+      // Start again → old previews cleared; multiple outputs → ZIP label
+      t$('start').click();
+      await sleep(sleepBase*3);
+      const thumbs = document.querySelectorAll('#gallery .thumb');
+      ok(thumbs.length >= 1, 'new previews rendered');
+      equal(t$('download').textContent, 'Download ZIP with all images', 'ZIP label when multiple outputs');
+    });
+
+    /* --------- Runner ---------- */
+    async function run(){
+      log(`<div class="suite">Suites: ${suitesFilter.length ? suitesFilter.join(', ') : 'all'} — Mocks: ${useMocks ? 'on' : 'off'}</div>`);
+      for (const t of tests){
+        if (!wantSuite(t.name)) continue;
+        try { await t.fn(); }
+        catch(e){ assert(false, `${t.name} crashed: ${e && e.message || e}`); }
+      }
+      log('<b>Done.</b>');
+      help.textContent = helpText;
+    }
+    window.addEventListener('load', ()=> setTimeout(run, sleepBase*3));
   })();
   </script>
 </body>
