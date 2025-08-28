@@ -1,1 +1,677 @@
-hello world
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bordered & Dated Photo Prep</title>
+
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABtklEQVR4nI2SscrqMBTHT9LU4laog4hiQaSIg4Pubj6As+/iqpuLvoGDY32E4Nalg4tQ0VKosx3a0qQ535CL98K9fPf7TyfnnOT/y0nI8/m83W7wM3meB77vZ1mGP1CWZb7vM9u2lVKr1QoR9TGISAjJ85wQ0mw2dZIQst/vbdsGznkcx3+7t9ttx3H+zMRxzDlnAEAptSyrrmtCiBBCd79er/f73el0hBCIaBgGpRQAmN4tpUREpdRyuRyNRpvN5nQ6xXGc57lhGHVdf4CBc54kiWEYhBAACIKgrutWq6WrHyrDMJIk4ZxTvWaMIeJisZjNZpTS9XoNAP1+PwiC8XhMCNE8vx1M0wSAy+WCiFLKqqp6vd7hcEDE/sY9AwKBgKWUEMfxfD6f91dRFI+ioBQCqqoKh8NGo6CqGIZRSrVZL0zQFEbBaLVa+KNsP4H4BuJz2JSMAIUSyrmsnSRJf7/fr9TNE0Pd8jwLEsM03T7Xa7Ylsmk2EYy7IMx3FuEwqFQghJSuM4SZIYhr/0N2UoigJ++oPZ5bKu63K5sN/vpaIoiqL8D/P9LoBCr9frdmORSTar1er9v2LB6KR9stms/ldTdMwDMv1+gZBkEVRVlcQAAAAAElFTkSuQmCC">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAACmUlEQVR4nO2VS2gUURSHv6VCqVStRSsXG2wi9ZMXCBi8NF4kNngTiQYbiAj+gdgGUtxs24ixhSzWshk9YlNghuAxhRFGXmxvFmlMk3YNOYkKXZ5YbFUpSRzJ+97zXubqTrdc0rV6V5X55xz7jCul8vN6Hg8jnvEzpdFqtRa5WKxSsbD5d1uX+N+K3uC4XAIAMuMfZTQa9WWz2aF+kslkQpSUZn+b67wFkUdPA3dzY7nAo2hVj+zafPl+w83RmkVCuVu/Nb5n7cRP3b2tYHOdjNRn1az2VxpQ6HQ76Em1uP7j3h7iR4WZmtPlYKwOW5MJ4r4X1VVXooh5AIeT2a+vb0VQKVS1HOSxM71lY+SHsBAaR0eduzfTXtgIx5cH7hVxhlLezEk/MYimHZbxb/jKMKHt/Jscj9UD09P3Rx43hYddsiKePyUN/qX9D2QU2D73FeXJ5fKYqrCcn8CC0GPzjqBMR1VEc8vGzfc6TdzIGW+iVXGWhMXDRRZ9wOukEd6N1MqlU8hQVRL/XSHpXkCMCoUCnpPpaAsjGYRseRRiUBo0gyoHrTq0hGQIcL0cZQpKFeLBjc6/TSU3f2xQHx8FgJFD1foz9yOnjB5IdgcF31MaYwyjNqSW+KAw4ybLhKaI/DbVbrC2WMRp6+Z5oXH1dyNoEN/muOyFukPXgQYM8eB3GyzUsQxmoO4z8byKuMrvQ65UlcEp/gNPAj2Av7DpgV4R9C3r4RfAaPFfL3SwOk5vF7oFWQ1v4j6W7Bk5BGeY9n0+qv30n2IQ1dr4x7Y9/QQjMuzp6cv0gAAAABJRU5ErkJggg==">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACp+jQDAAADzUlEQVR4nO2dS4gUURhGVxGzFsuIFq1YMXQXm+CWtm4QLEgiokWExT8JGe0P+JeQkHtEJA0tRGxV/8DFnCkZlMk5h79A+2k7L73s7OzM8YB1AphI4aY2Z+OcPnZ2dn2/2i/mBWrEc4wmtIs1oFEaoNMUwiR0bDCd7ZBZjsUYjVkMqzRGFVjvskh1EY7vTUHMMxRKzjD0oCvTdPOh2fE3jT3tUCeE/ehMWJfVSBhBi8No6vE7SQeU3R1TTjI+QOJ1wn8j1vF+ty9X6kZ2KMSirA1LxKODMaReNo84Dpdv0jsEC53k2OZGrlXomWEz6m3LSoj4sDXqUZ7ZMo65iUuzM55XGg9Vx1EYx6k24iHD0WvJYk9EDOKuEGeRR8cYkHGuFa7oQ9H/RX3IujvWMW3qkSfxPh7uLBWm+dYwrjNN3md42kKPfRXu0pYy0V84fGy0F0/HiM+9OXY3wnC9j6y1TaCmkn2MEsZrk7gZH8tw0mC0ovqgPRyApZNYZ/V0cs9exEPVglb3rt+3P7/N61yx9L7hRGK80zjDRIs3KsGyXXEerOWFhKnt+0Gj0H9FLTWD98gmFMVEfe2oV2EQbRhZDEpC8aG0uZpYPwrU1j3u2V6WBtRnOO9N3zKv8m6mfoWqKrweuzSB6Aw7vcz+RQwlpj/qglFnSxkh5nlg2f77A1t5VOw4tIvtGLx0tkdL09Cr7LM4/0Xd6Ky1n6X0tnoje6Nn2VupHyQfcXt5kF+KEMu1CeIlj5IcoFbQbTeBYjr5YBGgn6c4QaqU0JxhTNnqjfTL++pE0s9OdYO4Nj2Id7z9YJz4HEy4eJvP+4G57eBj1I8xj/nQenZ0EkxkLloJDruEMnZ+hrSQtMuIR8cHVmLSlgy/9VHSbBLhGZ8TzPSLcpQcuEe4wE/5Pp8trPueDlbwLuPP9RJpSUtQNG9zJFXNRXhOPOQjHt9ITLspHnDtbX9kCOHWhcFg7SReZKzQxr1E5wVKmTiZRHZlEbZHreRPEztcnPVu9dlfHep7UzzTpg4nVYnsjKx8GnQ9zn+PyJjRH9jhMMaFO0fSDZTSi5RVZ34RDj2NWloJzdT7hmQIPVWrE4yOjDrss8MdrA9q7JkqIMiNxNJy2AvP07QqHwL9LBo+x1N8krt1XKuIV5uk3rJcRy/6DLX9l/9uWxLrrFMY1S6Y8u9bydNNzkngEQ/LsuFYhYprSoI6Y6WZ07FZy0gCeEPfOeMHszZlmEa9RcXITjM9wQLhXz1qSok3kxx01/YVaqZT0iGzwUAAAAASUVORK5CYII=">
+
+<!-- Fonts: UI + Mono for filenames -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Atkinson Hyperlegible Next (UI) -->
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Attempt to load a mono companion; fallback to system monospace if unavailable -->
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next+Mono:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  :root { --bg:#0b0c10; --fg:#e8e8e8; --muted:#aeb4bd; --accent:#62d0ff; --card:#15171c; --ok:#5bd67a; --warn:#ffcc66; --err:#ff6b6b; }
+  body {
+    margin:0;
+    font:14px/1.4 "Atkinson Hyperlegible Next", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+    background:var(--bg); color:var(--fg);
+  }
+  header { padding:20px; border-bottom:1px solid #1f2229; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; font-weight:650; }
+  main { max-width:1100px; margin:24px auto; padding:0 16px 80px; }
+  .card { background:var(--card); border:1px solid #1f2229; border-radius:10px; padding:16px; }
+  .row-right { display:flex; justify-content:flex-end; }
+
+  label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
+  input[type="number"] { width:110px; padding:8px; border-radius:8px; border:1px solid #2a2f38; background:#0f1216; color:#e8e8e8; font-family:"Atkinson Hyperlegible Next", sans-serif; }
+  input[type="checkbox"] { transform: translateY(1px); }
+  .check { display:flex; align-items:center; gap:8px; color:#d6dde6; }
+  .btn { appearance:none; border:1px solid #2a2f38; background:#0f1216; color:#e8e8e8; padding:10px 14px; border-radius:10px; cursor:pointer; font-family:"Atkinson Hyperlegible Next", sans-serif; }
+  .btn.primary { background:var(--accent); color:#061018; font-weight:700; border-color:#45bdea; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .muted { color:var(--muted); }
+
+  /* Progress + log */
+  .progress { margin-top:14px; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; overflow:hidden; height:10px; }
+  .bar { height:100%; width:0%; background:linear-gradient(90deg,#62d0ff,#8ef0b3); transition:width .2s ease; }
+  #progressWrap { display:none; }
+  #log { margin-top:12px; white-space:pre-wrap; max-height:220px; overflow:auto; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; padding:10px; display:none; }
+  /* Filenames in mono bold */
+  #log .fname, .thumb .cap { font-family:"Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; color:#fff; }
+
+  /* Upload */
+  .dropwrap { position:relative; }
+  .dropzone { margin-top:14px; padding:18px; border:2px dashed #2a2f38; border-radius:10px; background:#0f1216; text-align:center; color:#cbd2dc; cursor:pointer; }
+  .dropzone.drag { border-color:#62d0ff; color:#62d0ff; background:#0f1216AA; }
+  .chooser { position:absolute; inset:auto 0 0 auto; transform:translateY(8px); display:none; gap:8px; background:#0f1216; border:1px solid #2a2f38; border-radius:10px; padding:10px; z-index:5; }
+  .chooser.show { display:flex; }
+  .chooser .btn { padding:8px 10px; }
+  .mobilepick { display:none; margin-top:8px; }
+
+  /* Settings */
+  details.settings { margin-bottom:16px; }
+  details.settings summary { cursor:pointer; user-select:none; padding:10px 12px; border:1px solid #2a2f38; border-radius:10px; background:#0f1216; color:#e8e8e8; font-weight:600; }
+  details.settings > .card { margin-top:10px; }
+  .checks { display:flex; flex-direction:column; gap:8px; width:100%; margin-top:8px; }
+
+  /* Gallery */
+  #previewSection { display:none; }
+  #gallery { margin-top:16px; display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
+  .thumb { border:1px solid #2a2f38; border-radius:10px; overflow:hidden; background:#0f1216; display:flex; flex-direction:column; }
+  .thumb .box { width:100%; aspect-ratio: 1 / 1; overflow:hidden; background:#0b0c10; }
+  .thumb .box button.open { all:unset; display:block; width:100%; height:100%; cursor:pointer; }
+  .thumb .box img { width:100%; height:100%; display:block; object-fit:contain; object-position:center; background:#0b0c10; }
+  .thumb .cap { padding:8px; font-size:12px; color:#b8c0cc; }
+
+  /* Footer / Download */
+  footer { position:fixed; inset:auto 0 0 0; padding:12px 16px; background:rgba(11,12,16,.8); border-top:1px solid #1f2229; backdrop-filter: blur(6px); display:flex; gap:12px; justify-content:center; }
+  a.download { color:#061018; background:var(--ok); border:1px solid #3fbf63; padding:10px 14px; border-radius:10px; font-weight:700; text-decoration:none; font-family:"Atkinson Hyperlegible Next", sans-serif; }
+  #dlbar { display:none; }
+
+  /* Lightbox */
+  .lightbox { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.9); z-index:9999; }
+  .lightbox.show { display:flex; }
+  .lb-stage { position:relative; max-width:95vw; max-height:90vh; display:flex; flex-direction:column; align-items:center; }
+  .lb-viewport { position:relative; width:95vw; max-width:95vw; height:85vh; max-height:85vh; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; z-index:1; }
+  .lb-img { max-width:95vw; max-height:85vh; object-fit:contain; user-select:none; }
+  .lb-cap { margin-top:8px; color:#dbe2ea; font-size:13px; text-align:center; max-width:90vw; z-index:1; font-family:"Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; }
+  .lb-close { position:absolute; top:-8px; right:-8px; background:#111; color:#eee; border:1px solid #333; border-radius:999px; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1; z-index:6; }
+  .lb-prev, .lb-next { position:absolute; top:50%; transform:translateY(-50%); background:#111a; color:#eee; border:1px solid #333; border-radius:999px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; }
+  .lb-prev { left:10px; }
+  .lb-next { right:10px; }
+</style>
+</head>
+<body>
+  <header class="card">
+    <h1>📷 Bordered & Dated Photo Prep</h1>
+    <div class="muted">100% privacy – files do not leave your browser</div>
+  </header>
+
+  <main>
+    <details class="settings">
+      <summary>Settings</summary>
+      <section class="card">
+        <div class="row" style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end;">
+          <div>
+            <label for="shortSide">Short side (px)</label>
+            <input id="shortSide" type="number" min="64" step="1" value="3164" />
+          </div>
+          <div>
+            <label for="borderPct">Border (% of short side)</label>
+            <input id="borderPct" type="number" min="0.1" step="0.1" value="2" />
+          </div>
+          <div>
+            <label for="dpi">DPI metadata</label>
+            <input id="dpi" type="number" min="72" step="1" value="300" />
+          </div>
+        </div>
+        <div class="checks">
+          <label class="check"><input id="optSharpen" type="checkbox" />Sharpen after resize</label>
+          <label class="check"><input id="optGray" type="checkbox" />Grayscale</label>
+          <label class="check"><input id="optNoStrip" type="checkbox" />Keep metadata (disable strip)</label>
+          <label class="check"><input id="optNoSRGB" type="checkbox" />Keep original colorspace (disable sRGB)</label>
+        </div>
+        <small class="note">
+          Defaults: strips metadata, enforces sRGB, and writes DPI=300.<br>
+          If EXIF is missing, fallback is file’s <em>lastModified</em> timestamp.
+        </small>
+      </section>
+    </details>
+
+    <section class="card">
+      <div class="dropwrap" id="dropwrap">
+        <!-- Mobile-only picker -->
+        <div class="mobilepick" id="mobilePickWrap">
+          <label for="images">Pick images (camera roll / library)</label>
+          <input id="images" class="btn" type="file" accept="image/*" multiple />
+        </div>
+
+        <!-- Unified dropzone -->
+        <div id="drop" class="dropzone">
+          Click or drop files here<br>
+          <small class="muted">Images or ZIP. On desktop you can also choose a whole folder.</small>
+        </div>
+
+        <!-- Desktop chooser -->
+        <div id="chooser" class="chooser" role="menu" aria-hidden="true">
+          <button class="btn" id="chooseFiles">Pick files (images/ZIP)</button>
+          <button class="btn" id="chooseFolder">Pick folder</button>
+        </div>
+
+        <!-- Hidden inputs -->
+        <input id="filesInput" type="file" accept="image/*,.zip" multiple style="display:none" />
+        <input id="folderInput" type="file" webkitdirectory multiple style="display:none" />
+      </div>
+
+      <!-- Progress + Console -->
+      <div id="progressWrap" class="progress"><div class="bar" id="bar"></div></div>
+      <div id="log" aria-live="polite"></div>
+
+      <!-- Start button now UNDER the console -->
+      <div class="row-right" style="margin-top:10px">
+        <button id="start" class="btn primary" style="display:none">Start</button>
+      </div>
+    </section>
+
+    <section id="previewSection" class="card">
+      <h3 style="margin-top:0">Previews</h3>
+      <div id="gallery"></div>
+    </section>
+  </main>
+
+  <footer id="dlbar" style="display:none">
+    <a id="dllink" class="download">Download ZIP with all images</a>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
+    <div class="lb-stage">
+      <button class="lb-close" title="Close" aria-label="Close">&times;</button>
+      <div class="lb-viewport">
+        <img class="lb-img" alt="Preview"/>
+      </div>
+      <div class="lb-cap"></div>
+      <button class="lb-prev" title="Previous" aria-label="Previous">&#10094;</button>
+      <button class="lb-next" title="Next" aria-label="Next">&#10095;</button>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://unpkg.com/exifr/dist/lite.umd.js"></script>
+  <script src="https://unpkg.com/fflate/umd/index.js"></script>
+  <script type="module">
+    import * as Magick from 'https://knicknic.github.io/wasm-imagemagick/magickApi.js';
+    window.Magick = Magick;
+  </script>
+
+  <script>
+  (function(){
+    const logEl = document.getElementById('log');
+    const progressWrap = document.getElementById('progressWrap');
+    const barEl = document.getElementById('bar');
+    const startBtn = document.getElementById('start');
+
+    const dropwrap = document.getElementById('dropwrap');
+    const drop = document.getElementById('drop');
+    const chooser = document.getElementById('chooser');
+    const chooseFilesBtn = document.getElementById('chooseFiles');
+    const chooseFolderBtn = document.getElementById('chooseFolder');
+
+    const filesInput = document.getElementById('filesInput');
+    const folderInput = document.getElementById('folderInput');
+
+    const mobilePickWrap = document.getElementById('mobilePickWrap');
+    const imagesInput = document.getElementById('images');
+
+    const dlbar = document.getElementById('dlbar');
+    const dllink = document.getElementById('dllink');
+    const previewSection = document.getElementById('previewSection');
+    const gallery = document.getElementById('gallery');
+
+    // Lightbox
+    const lb = document.getElementById('lightbox');
+    const lbImg = lb.querySelector('.lb-img');
+    const lbCap = lb.querySelector('.lb-cap');
+    const lbClose = lb.querySelector('.lb-close');
+    const lbPrev = lb.querySelector('.lb-prev');
+    const lbNext = lb.querySelector('.lb-next');
+
+    // Constants
+    const SUP_EXT = ['jpg','jpeg','png','tif','tiff','bmp','gif'];
+    const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+    // State
+    const previewItems = [];
+    const queuedFiles = []; // {name, fileLike, bytes}
+    let magickReady = false;
+    let processing = false;
+    let needClearOnNextQueue = false; // clear console once when new files are added after a run
+
+    // Robust download handling
+    let currentDownloadUrl = null;
+    function revokeDownloadUrl(){
+      if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null; }
+    }
+    function setDownloadLink(blob, filename, labelText){
+      revokeDownloadUrl();
+      currentDownloadUrl = URL.createObjectURL(blob);
+      dllink.href = currentDownloadUrl;
+      dllink.download = filename || 'download';
+      dllink.textContent = labelText || 'Download';
+      dlbar.style.display = 'flex';
+    }
+    function triggerDownloadFallback(href, filename){
+      try{
+        const a=document.createElement('a');
+        a.href=href; a.download=filename||'download';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      }catch{ window.open(href,'_blank'); }
+    }
+    dllink.addEventListener('click',(e)=>{
+      if (!dllink.href) return;
+      e.preventDefault();
+      triggerDownloadFallback(dllink.href, dllink.download || 'download');
+    });
+    window.addEventListener('beforeunload', revokeDownloadUrl);
+
+    // UI toggles
+    function toggleUploadUI() {
+      mobilePickWrap.style.display = isMobile ? 'block' : 'none';
+      chooser.classList.remove('show');
+      chooser.setAttribute('aria-hidden', 'true');
+      chooser.style.removeProperty('display');
+    }
+    toggleUploadUI();
+
+    // Wait for Magick silently
+    (async function waitForMagick(){
+      while (!window.Magick || typeof window.Magick.Call !== 'function') {
+        await new Promise(r => setTimeout(r,100));
+      }
+      magickReady = true;
+      updateStartVisibility();
+    })();
+
+    // Helpers
+    function println(msg, color){
+      logEl.style.display='block';
+      const div=document.createElement('div');
+      if(color) div.style.color=color;
+      div.innerHTML=msg; // allow <span class="fname">
+      logEl.appendChild(div);
+      logEl.scrollTop=logEl.scrollHeight;
+    }
+    function clearLog(){ logEl.textContent=''; logEl.style.display='none'; }
+    function setProgress(a,b){ barEl.style.width=(b?Math.round(a/b*100):0)+'%'; }
+    function sanitizeBase(name){ return (name||'').replace(/^.*[\\/]/,'').replace(/\.[^.]+$/,'').replace(/[^\w\-]+/g,'_'); }
+    function fmtDateLabel(d){ return `${MONTHS[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')}, ${d.getFullYear()}`; }
+    async function readAsUint8(f){ return new Uint8Array(await f.arrayBuffer()); }
+    async function ensureLabelFont(px=16){ if (!('fonts' in document)) return; try{ await document.fonts.ready; await document.fonts.load(`700 ${px}px "Atkinson Hyperlegible Next"`); await document.fonts.load(`700 ${px}px "Atkinson Hyperlegible Next Mono"`);}catch{} }
+    const isBadPath = (n) => (n||'').startsWith('__MACOSX/') || (n||'').startsWith('.') || (n||'').includes('/.');
+    const isImageName = (n) => SUP_EXT.includes(((n||'').split('.').pop()||'').toLowerCase());
+
+    // ---- Preview / lightbox reset helpers ----
+    function revokePreviewUrls() {
+      try { for (const it of previewItems) { if (it && it.url) URL.revokeObjectURL(it.url); } } catch {}
+    }
+    let currentIndex = -1;
+    function clearPreviewsUI() {
+      revokePreviewUrls();
+      previewItems.length = 0;
+      gallery.innerHTML = '';
+      previewSection.style.display = 'none';
+      if (lb.classList.contains('show')) {
+        lb.classList.remove('show');
+        lbImg.src = '';
+        currentIndex = -1;
+      }
+    }
+
+    // DnD: prevent default browser behavior globally
+    ['dragenter','dragover','dragleave','drop'].forEach(ev=>{
+      window.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); }, false);
+      document.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); }, false);
+    });
+    // Dropzone highlight
+    drop.addEventListener('dragenter', ()=> drop.classList.add('drag'));
+    drop.addEventListener('dragover', ()=> drop.classList.add('drag'));
+    drop.addEventListener('dragleave', ()=> drop.classList.remove('drag'));
+    drop.addEventListener('drop', async (e)=>{
+      drop.classList.remove('drag');
+      await handleFileList([...(e.dataTransfer.files||[])], {logContext:'drag & drop'});
+    });
+
+    // Click behavior
+    drop.addEventListener('click', ()=>{
+      if (isMobile) {
+        imagesInput.click();
+      } else {
+        chooser.style.removeProperty('display');
+        chooser.classList.toggle('show');
+        chooser.setAttribute('aria-hidden', chooser.classList.contains('show') ? 'false' : 'true');
+      }
+    });
+    // Close chooser when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropwrap.contains(e.target) && chooser.classList.contains('show')) {
+        chooser.classList.remove('show');
+        chooser.setAttribute('aria-hidden', 'true');
+      }
+    });
+    // Desktop chooser buttons
+    chooseFilesBtn.addEventListener('click', ()=>{ chooser.classList.remove('show'); chooser.setAttribute('aria-hidden','true'); filesInput.click(); });
+    chooseFolderBtn.addEventListener('click', ()=>{ chooser.classList.remove('show'); chooser.setAttribute('aria-hidden','true'); folderInput.click(); });
+
+    // Queue + logging
+    function queueSize(){ return queuedFiles.length; }
+    function updateStartVisibility(){
+      const show = magickReady && !processing && queueSize()>0;
+      startBtn.style.display = show ? 'inline-block' : 'none';
+      startBtn.disabled = !show;
+    }
+
+    async function unzipFiles(zipFile){
+      const buf=new Uint8Array(await zipFile.arrayBuffer());
+      const entries=fflate.unzipSync(buf);
+      const out=[];
+      for(const [n,bytes] of Object.entries(entries)){
+        if (isBadPath(n)) continue;
+        if (!isImageName(n)) continue;
+        if (!(bytes instanceof Uint8Array) || !bytes.length) continue;
+        const mime = (()=>{
+          const ext=(n.split('.').pop()||'').toLowerCase();
+          if (ext==='png') return 'image/png';
+          if (ext==='gif') return 'image/gif';
+          if (ext==='bmp') return 'image/bmp';
+          if (ext==='tif'||ext==='tiff') return 'image/tiff';
+          return 'image/jpeg';
+        })();
+        out.push({ name:n, bytes, fileLike:new File([bytes], n, {type:mime}) });
+      }
+      return out;
+    }
+
+    async function addImagesToQueue(files){
+      let added = 0;
+      for (const f of files){
+        const n=f.name||''; if (isBadPath(n)) continue;
+        if (!isImageName(n)) continue;
+        if (f.size === 0) continue;
+        queuedFiles.push({name:f.name,fileLike:f,bytes:await readAsUint8(f)});
+        println(`Queued <span class="fname">${sanitizeBase(f.name)}</span>`, 'var(--muted)');
+        added++;
+      }
+      return added;
+    }
+
+    async function addZipToQueue(file){
+      const imgs = await unzipFiles(file);
+      if (imgs.length === 0){
+        println(`✖ <span class="fname">${sanitizeBase(file.name)}</span> contained no images`, 'var(--err)');
+        return 0;
+      }
+      for (const e of imgs){
+        queuedFiles.push({name:e.name,fileLike:e.fileLike,bytes:e.bytes});
+      }
+      println(`Queued <span class="fname">${sanitizeBase(file.name)}</span> with ${imgs.length} image(s)`, 'var(--muted)');
+      return imgs.length;
+    }
+
+    async function handleFileList(list,{logContext}={}){
+      // Clear console (and previews) once if we just finished a run and are adding fresh files:
+      if (needClearOnNextQueue) { clearLog(); clearPreviewsUI(); needClearOnNextQueue = false; }
+
+      let imagesAdded = 0, zips = 0, zipsAdded = 0;
+      for (const f of list){
+        const n=f.name||'';
+        if (isBadPath(n)) continue;
+        const ext=(n.split('.').pop()||'').toLowerCase();
+        if (ext==='zip'){ zips++; zipsAdded += await addZipToQueue(f); }
+        else if (isImageName(n)){ imagesAdded += await addImagesToQueue([f]); }
+      }
+      if (imagesAdded) println(`Added ${imagesAdded} image(s)${logContext?` from ${logContext}`:''}.`, 'var(--muted)');
+      if (zips && !zipsAdded) println(`✖ ${zips} ZIP selected but contained no supported images.`, 'var(--err)');
+      updateStartVisibility();
+    }
+
+    // Inputs
+    imagesInput && imagesInput.addEventListener('change', async ()=>{ await handleFileList([...(imagesInput.files||[])], {logContext:'mobile picker'}); imagesInput.value=''; });
+    filesInput.addEventListener('change', async ()=>{ await handleFileList([...(filesInput.files||[])], {logContext:'file picker'}); filesInput.value=''; });
+    folderInput.addEventListener('change', async ()=>{ await handleFileList([...(folderInput.files||[])], {logContext:'folder picker'}); folderInput.value=''; });
+
+    // Options snapshot
+    const opts = () => ({
+      shortSide: +document.getElementById('shortSide').value || 3164,
+      borderPct: +document.getElementById('borderPct').value || 2,
+      dpi: +document.getElementById('dpi').value || 300,
+      sharpen: document.getElementById('optSharpen').checked,
+      grayscale: document.getElementById('optGray').checked,
+      strip: !document.getElementById('optNoStrip').checked,
+      srgb: !document.getElementById('optNoSRGB').checked,
+    });
+
+    // Imaging helpers
+    async function makeLabelPng(text,px){
+      await ensureLabelFont(px);
+      const cvs=document.createElement('canvas'),ctx=cvs.getContext('2d');
+      const fontSpec = `700 ${px}px "Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+      ctx.font=fontSpec;
+      const w=Math.max(1,Math.ceil(ctx.measureText(text).width)),h=Math.max(1,Math.ceil(px*1.3));
+      cvs.width=w;cvs.height=h;
+      const ctx2=cvs.getContext('2d');
+      ctx2.font=fontSpec; ctx2.fillStyle='#000'; ctx2.textBaseline='middle'; ctx2.fillText(text,0,Math.round(h/2));
+      return new Promise(r=>cvs.toBlob(b=>r({blob:b,width:w,height:h}),'image/png'));
+    }
+    async function getDateTakenWithSource(fileLike){
+      try{
+        const exif=await exifr.parse(fileLike,{translateValues:false});
+        const dt=exif?.DateTimeOriginal||exif?.CreateDate||exif?.MediaCreateDate||exif?.TrackCreateDate;
+        if(dt instanceof Date)return{date:dt,source:'EXIF'};
+      }catch{}
+      return{date:new Date(fileLike.lastModified||Date.now()),source:'FILE'};
+    }
+    async function getImageSize(fileLike){
+      try{
+        const blob = fileLike instanceof Blob ? fileLike : new Blob([await fileLike.arrayBuffer()], {type: 'image/jpeg'});
+        const bmp=await createImageBitmap(blob); const w=bmp.width,h=bmp.height; bmp.close&&bmp.close(); return{w,h};
+      }catch{
+        try{
+          const exif = await exifr.parse(fileLike,{translateValues:false});
+          const w = exif?.PixelXDimension || exif?.ExifImageWidth || exif?.ImageWidth;
+          const h = exif?.PixelYDimension || exif?.ExifImageHeight || exif?.ImageLength;
+          if (w && h) return { w:+w, h:+h };
+        }catch{}
+      }
+      return null;
+    }
+    function outToBlob(of,mime='image/jpeg'){
+      if(of.blob instanceof Blob) return of.blob;
+      if(of.content) return new Blob([of.content],{type:mime});
+      if(of.data) return new Blob([of.data],{type:mime});
+      throw new Error('Unknown output format');
+    }
+
+    // Process one image
+    async function processOne({name,fileLike,bytes},i,total,settings){
+      const base=sanitizeBase(name);
+      const info=await getDateTakenWithSource(fileLike);
+      const date=info.date, dateSrc=info.source;
+      const label=fmtDateLabel(date);
+
+      const sz=await getImageSize(fileLike);
+      if (!sz) throw new Error('Skipped: couldn’t determine image size');
+      const {w:ow,h:oh}=sz;
+
+      const scale=settings.shortSide/Math.min(ow,oh);
+      const rw=Math.max(1,Math.round(ow*scale));
+      const rh=Math.max(1,Math.round(oh*scale));
+      const borderPx=Math.max(1,Math.round(Math.min(rw,rh)*settings.borderPct/100));
+      const pointPx=Math.max(8,Math.min(28,Math.round(borderPx*0.6)));
+      const yoff=Math.max(1,Math.round(borderPx*0.25));
+
+      const lbl=await makeLabelPng(label,pointPx);
+      const lblBytes=new Uint8Array(await lbl.blob.arrayBuffer());
+      const xpos=Math.max(0,borderPx+rw-lbl.width);
+
+      const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
+      const outName=`${y}-${m}-${d}_${base}.jpg`;
+
+      const ext=(name.split('.').pop()||'jpg').toLowerCase();
+      const inName=`in_${i}.${SUP_EXT.includes(ext)?ext:'jpg'}`;
+      const lblName=`label_${i}.png`;
+
+      const args=[
+        "convert","-quiet", inName,
+        "-auto-orient","-resize",`${settings.shortSide}x${settings.shortSide}^`,
+        ...(settings.srgb?["-colorspace","sRGB"]:[]),
+        ...(settings.grayscale?["-colorspace","Gray"]:[]),
+        ...(settings.sharpen?["-unsharp","0x1"]:[]),
+        "-bordercolor","#FFFFFF","-border",String(borderPx),
+        lblName,"-gravity","SouthWest","-geometry",`+${xpos}+${yoff}`,"-compose","over","-composite",
+        "-density",String(settings.dpi),
+        ...(settings.strip?["-strip"]:[]),
+        "-quality","100","-sampling-factor","4:4:4",
+        outName
+      ];
+
+      const inputs=[{name:inName,content:bytes},{name:lblName,content:lblBytes}];
+      const outFiles = await window.Magick.Call(inputs,args);
+      if(!outFiles||!outFiles.length) throw new Error('No output from ImageMagick');
+
+      const of = outFiles.find(f=>f.name===outName) || outFiles[0];
+      const outBlob = outToBlob(of,'image/jpeg');
+
+      // Preview card
+      const url=URL.createObjectURL(outBlob);
+      const card=document.createElement('div'); card.className='thumb';
+      const box=document.createElement('div'); box.className='box';
+      const btn=document.createElement('button'); btn.className='open'; btn.type='button';
+      const img=document.createElement('img'); img.src=url; img.alt=of.name;
+      const cap=document.createElement('div'); cap.className='cap';
+      const caption = `${of.name}  [${dateSrc} · ${label}]`;
+      cap.textContent=caption;
+      btn.appendChild(img); box.appendChild(btn); card.append(box,cap); gallery.appendChild(card);
+      if (previewSection.style.display === 'none') previewSection.style.display = 'block';
+
+      // Lightbox
+      const index = previewItems.push({ url, name: of.name, caption }) - 1;
+      btn.addEventListener('click', () => openLightbox(index));
+
+      // SUCCESS LOG (filenames in mono bold)
+      println(`✔ <span class="fname">${sanitizeBase(name)}</span> → <span class="fname">${of.name}</span>  [${rw}x${rh}, border ${borderPx}px, label "${label}", src=${dateSrc}]`,'var(--ok)');
+
+      setProgress(i+1,total);
+      return { name: of.name, blob: outBlob };
+    }
+
+    // Lightbox helpers
+    function openLightbox(idx){
+      if (idx < 0 || idx >= previewItems.length) return;
+      currentIndex = idx;
+      const item = previewItems[idx];
+      lbImg.src = item.url;
+      lbImg.alt = item.name;
+      lbCap.textContent = item.caption;
+      lb.classList.add('show');
+    }
+    function closeLightbox(){
+      lb.classList.remove('show');
+      lbImg.src = '';
+      currentIndex = -1;
+    }
+    function step(dir){
+      if (previewItems.length < 1) return;
+      currentIndex = (currentIndex + dir + previewItems.length) % previewItems.length;
+      const item = previewItems[currentIndex];
+      lbImg.src = item.url;
+      lbImg.alt = item.name;
+      lbCap.textContent = item.caption;
+    }
+    lbClose.addEventListener('click', closeLightbox);
+    lbPrev.addEventListener('click', ()=> step(-1));
+    lbNext.addEventListener('click', ()=> step(1));
+    document.addEventListener('keydown', (e) => {
+      if (!lb.classList.contains('show')) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') step(-1);
+      else if (e.key === 'ArrowRight') step(1);
+    });
+    lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
+
+    // ZIP creation
+    function zipNameToday(){
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth()+1).padStart(2,'0');
+      const d = String(now.getDate()).padStart(2,'0');
+      return `bordered-photos-${y}-${m}-${d}.zip`;
+    }
+    async function zipOutputs(files){
+      const dict={};
+      for(const f of files){
+        const ab=await f.blob.arrayBuffer();
+        dict[f.name]=new Uint8Array(ab);
+      }
+      const zipped=fflate.zipSync(dict,{level:6});
+      return new Blob([zipped],{type:'application/zip'});
+    }
+
+    // Start processing
+    const barReset = () => { barEl.style.width='0%'; };
+    startBtn.addEventListener('click', async ()=>{
+      try{
+        processing = true;
+        updateStartVisibility(); // hide start while processing
+
+        // show progress & prepare UI
+        progressWrap.style.display='block';
+        clearLog();
+        clearPreviewsUI();
+        revokeDownloadUrl();
+        dlbar.style.display='none';
+        barReset();
+
+        if (queuedFiles.length === 0){
+          println('Queue is empty. Add images or a ZIP first.','var(--warn)');
+          return;
+        }
+
+        println(`Processing ${queuedFiles.length} queued image(s)…`,'var(--muted)');
+        const settings=opts();
+        filesInput.disabled=true; folderInput.disabled=true; imagesInput && (imagesInput.disabled=true);
+
+        const outputs=[];
+        for(let i=0;i<queuedFiles.length;i++){
+          try{
+            const of=await processOne(queuedFiles[i],i,queuedFiles.length,settings);
+            outputs.push(of);
+          }catch(err){
+            console.error(err);
+            const name = sanitizeBase(queuedFiles[i]?.name || `__${i}`);
+            println(`✖ <span class="fname">${name}</span> — ${err.message || err}`,'var(--err)');
+            setProgress(i+1,queuedFiles.length);
+          }
+        }
+
+        // Clear queue & inputs AFTER run
+        queuedFiles.length = 0;
+        filesInput.value = '';
+        folderInput.value = '';
+        if (imagesInput) imagesInput.value = '';
+        needClearOnNextQueue = true; // clear console & previews first on next queue additions
+
+        if(!outputs.length){
+          println('Nothing was produced. Check errors above.','var(--err)');
+        }else if(outputs.length===1){
+          setDownloadLink(outputs[0].blob, outputs[0].name, 'Download image');
+        }else{
+          println(`Zipping ${outputs.length} files…`,'var(--muted)');
+          const zipBlob=await zipOutputs(outputs);
+          setDownloadLink(zipBlob, zipNameToday(), 'Download ZIP with all images');
+        }
+        println('Done.','var(--ok)');
+
+      }catch(e){
+        console.error(e);
+        println('Fatal error: ' + (e.message || e),'var(--err)');
+      }finally{
+        progressWrap.style.display='none';
+        filesInput.disabled=false; folderInput.disabled=false; imagesInput && (imagesInput.disabled=false);
+        processing = false;
+        updateStartVisibility(); // will stay hidden until new files are queued
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
