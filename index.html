@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ARTSIFY – drop → artsify → zip</title>
   <!-- Google Fonts: Workbench (console) & Atkinson Hyperlegible Next (timestamp) -->
-  <link href="https://fonts.googleapis.com/css2?family=Workbench:wght@400..900&family=Atkinson+Hyperlegible+Next:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Workbench:wght@400..900&family=Atkinson+Hyperlegible:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0d0f12;
@@ -14,7 +14,7 @@
       --accent: #40d16a;
       --danger: #ff6b6b;
       --console-font: 'Workbench', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      --stamp-font: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, sans-serif;
+      --stamp-font: 'Atkinson Hyperlegible', 'Atkinson Hyperlegible Next', system-ui, sans-serif;
     }
     html, body {
       height: 100%;
@@ -78,7 +78,7 @@
       text-decoration: none;
       font-weight: 900; /* extrabold */
       font-variation-settings: 'wght' 900;
-      margin-right: 24px;
+      margin: 0; padding: 0;
       border-bottom: 2px solid transparent;
     }
     .link:hover { border-bottom-color: currentColor; }
@@ -105,7 +105,7 @@
 
   <!-- ImageMagick WASM (kept for decoding odd formats when canvas fails) -->
   <!-- Make sure magick.wasm sits next to index.umd.cjs on the CDN path. -->
-  <script src="https://cdn.jsdelivr.net/npm/@imagemagick/magick-wasm@0.0.35/dist/magick.js"></script>
+  
 
   <script>
   (function(){
@@ -227,17 +227,11 @@
             const buf = await f.slice(0, 32).arrayBuffer();
             const u8 = new Uint8Array(buf);
             const head = String.fromCharCode.apply(null, u8);
-            // TIFF: II*  or MM *
             if ((u8[0]===0x49&&u8[1]===0x49&&u8[2]===0x2A&&u8[3]===0x00) || (u8[0]===0x4D&&u8[1]===0x4D&&u8[2]===0x00&&u8[3]===0x2A)) return 'tiff';
-            // JPEG: FF D8
             if (u8[0]===0xFF && u8[1]===0xD8) return 'jpeg';
-            // PNG: 89 50 4E 47
             if (u8[0]===0x89 && u8[1]===0x50 && u8[2]===0x4E && u8[3]===0x47) return 'png';
-            // GIF: GIF8
             if (head.startsWith('GIF8')) return 'gif';
-            // WebP: RIFF....WEBP
             if (head.startsWith('RIFF') && head.substr(8,4)==='WEBP') return 'webp';
-            // HEIC/HEIF: 'ftyp' + brand heic/heif/mif1
             if (head.substr(4,4)==='ftyp'){
               const brand = head.substr(8,4);
               if (brand==='heic' || brand==='heif' || brand==='mif1' || brand==='heix' || brand==='hevc') return 'heic';
@@ -247,7 +241,7 @@
         }
 
         // 1) createImageBitmap (fast path)
-        try{ var img1 = await createImageBitmap(file); dlog('decode: createImageBitmap'); return resolve({ image: img1, type: file.type || mimeFromName(file.name) }); }catch(e){ dlog('decode: createImageBitmap failed'); }
+        try{ var img1 = await createImageBitmap(file);  return resolve({ image: img1, type: file.type || mimeFromName(file.name) }); }catch(e){ dlog('decode: createImageBitmap failed'); }
         // 2) HTMLImageElement fallback
         try{
           var url = URL.createObjectURL(file);
@@ -261,7 +255,7 @@
         async function afterHtmlImgFail(){
           const kind = await sniffKind(file);
           dlog('decode: sniff kind='+kind+' ext='+ext+' mime='+(file.type||''));
-          // 3) HEIC/HEIF-specific fallback via heic2any
+          // HEIC/HEIF via heic2any
           if (((ext==='heic'||ext==='heif') || kind==='heic') && window.heic2any) {
             try {
               dlog('decode: heic2any fallback');
@@ -271,7 +265,7 @@
               return;
             } catch(e) { dlog('heic2any failed: '+String(e)); }
           }
-          // 4) TIFF fallback via UTIF
+          // TIFF via UTIF
           if (((ext==='tif'||ext==='tiff') || kind==='tiff') && window.UTIF) {
             try {
               dlog('decode: UTIF fallback');
@@ -292,19 +286,8 @@
               }
             } catch(e) { dlog('UTIF failed: '+String(e)); }
           }
-          // 5) ImageMagick WASM fallback (PNG)
-          try{
-            if (!window.initializeImageMagick) throw new Error('magick-wasm not loaded');
-            if (!window.__magickReady){ window.__magickReady = initializeImageMagick({ locateFile: function(f){ return 'https://cdn.jsdelivr.net/npm/@imagemagick/magick-wasm@0.0.35/dist/'+f; } }); }
-            await window.__magickReady;
-            var arrayBuffer = await file.arrayBuffer();
-            var pngBytes=null;
-            await new Promise(function(res, rej){ try{ ImageMagick.read(new Uint8Array(arrayBuffer), function(img){ img.autoOrient(); img.write(MagickFormat.Png, function(data){ pngBytes=data; res(); }); }); }catch(e){ rej(e); } });
-            var blob=new Blob([pngBytes],{type:'image/png'});
-            var img4 = await createImageBitmap(blob);
-            dlog('decode: ImageMagick WASM');
-            resolve({ image: img4, type:'image/png' });
-          }catch(e){ reject(new Error('Could not decode image via canvas or ImageMagick.')); }
+          // Last resort
+          reject(new Error('Unsupported or corrupt image; tried browser, HEIC, TIFF decoders.'));
         }
       });
     }
@@ -319,7 +302,7 @@
         var border=Math.max(1, Math.round(0.02*shorter)); var textPx=Math.max(8, Math.round(0.5*border));
         var canvas=document.createElement('canvas'); canvas.width=w+border*2; canvas.height=h+border*2; var ctx=canvas.getContext('2d');
         ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.drawImage(image, border, border, w, h);
-        ctx.fillStyle='#000000'; ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible Next"+', '+"Atkinson Hyperlegible"+', system-ui, sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle';
+        ctx.fillStyle='#000000'; ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible"+', '+"Atkinson Hyperlegible Next"+', system-ui, sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle';
         var xRight=border+w; var yCenterBottomBorder=canvas.height - border/2; ctx.fillText(stamp, xRight, yCenterBottomBorder);
         var targetType=/jpe?g/i.test(originName)?'image/jpeg':(type||'image/png');
         canvas.toBlob(function(blob){
@@ -349,7 +332,7 @@
       var div=document.createElement('div'); div.className='line actions';
       var aDL=document.createElement('a'); aDL.className='link'; aDL.textContent='DOWNLOAD'; aDL.href=url; aDL.download=zipName;
       var aRS=document.createElement('a'); aRS.className='link'; aRS.textContent='RESET'; aRS.href='#'; aRS.addEventListener('click', function(e){ e.preventDefault(); resetAll(); });
-      div.appendChild(aDL); div.appendChild(document.createTextNode('   |   ')); div.appendChild(aRS);
+      div.appendChild(aDL); div.appendChild(document.createTextNode('   |   ')); div.appendChild(aRS);
       logEl.appendChild(div); logEl.scrollTop=logEl.scrollHeight;
     }
 
@@ -409,8 +392,6 @@
 
   })();
 </script>
-  <!-- Add HEIC/HEIF decoder fallback -->
-  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <!-- Add HEIC/HEIF decoder fallback -->
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <!-- Add TIFF decoder fallback (UTIF) -->
