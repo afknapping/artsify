@@ -13,6 +13,7 @@
       --muted: #8a8f98;
       --accent: #40d16a;
       --danger: #ff6b6b;
+      --warn: #f2c744;
       --console-font: 'Workbench', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       --stamp-font: 'Atkinson Hyperlegible', 'Atkinson Hyperlegible Next', system-ui, sans-serif;
     }
@@ -68,6 +69,7 @@
     .ok { color: var(--accent); font-weight: 700; }
     .skip { color: #93a1b3; }
     .err { color: var(--danger); }
+    .warn { color: var(--warn); font-weight: 700; }
     .actions { margin-top: 22px; }
     .link {
       color: #dfe7ff;
@@ -297,6 +299,7 @@
           return null;
         }
         var orientation = 1;
+        var exifHadDate = false;
 
         try {
           if (window.exifr && exifr.parse){
@@ -305,13 +308,14 @@
             var raw = data && (data.DateTimeOriginal || data.CreateDate || data.ModifyDate);
             var exifDate = parseExifLocalDay(raw);
             if (exifDate){
-              return resolve({ date: exifDate, source: 'EXIF', orientation: orientation });
+              exifHadDate = true;
+              return resolve({ date: exifDate, source: 'EXIF', orientation: orientation, exifHadDate: true });
             }
           }
         } catch(e) { /* fall through */ }
 
         var ts = new Date(file && file.lastModified ? file.lastModified : Date.now());
-        return resolve({ date: toLocalDay(ts), source: 'FILE', orientation: orientation });
+        return resolve({ date: toLocalDay(ts), source: 'FILE', orientation: orientation, exifHadDate: false });
       });
     }
 
@@ -420,10 +424,11 @@
 
         // date + exif orientation (local time)
         var best = await getBestDateAndExif(file);
-        var date=best.date, source=best.source, orientation=best.orientation;
+        var date=best.date, source=best.source, orientation=best.orientation, exifHadDate=best.exifHadDate;
 
-        var stamp = fmtDateForStamp(date);
+        // Build name prefix from the best available date (EXIF if present, else file timestamp)
         var datePrefix = fmtDateFileYYYYMMDD(date);
+        var newName = datePrefix+'-'+originName;
 
         var decoded = await loadAsImageBitmapOrMagick(file);
         var image=decoded.image, type=decoded.type;
@@ -439,7 +444,7 @@
 
         // size guard
         if (ow*oh > 50_000_000 || Math.max(ow, oh) > 16384) {
-          println("<span class='skip'>↷</span> "+escapeHtml(originName)+" <span class='muted'>"+escapeHtml(stamp)+" • too large; skipped</span>");
+          println("<span class='skip'>↷</span> "+escapeHtml(newName)+" <span class='muted'>(too large; skipped)</span>");
           return resolve();
         }
 
@@ -458,20 +463,30 @@
         ctx.drawImage(image, 0, 0, w, h);
         ctx.restore();
 
-        // date stamp
-        ctx.fillStyle='#000000';
-        ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible"+', '+"Atkinson Hyperlegible Next"+', system-ui, sans-serif';
-        ctx.textAlign='right'; ctx.textBaseline='middle';
-        var xRight=canvas.width - border; var yCenterBottomBorder=canvas.height - border/2;
-        ctx.fillText(stamp, xRight, yCenterBottomBorder);
+        // Only draw stamped date if EXIF had a date
+        if (exifHadDate) {
+          var stamp = fmtDateForStamp(date);
+          ctx.fillStyle='#000000';
+          ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible"+', '+"Atkinson Hyperlegible Next"+', system-ui, sans-serif';
+          ctx.textAlign='right'; ctx.textBaseline='middle';
+          var xRight=canvas.width - border; var yCenterBottomBorder=canvas.height - border/2;
+          ctx.fillText(stamp, xRight, yCenterBottomBorder);
+        }
 
         var targetType=/jpe?g/i.test(originName)?'image/jpeg':(type||'image/png');
         canvas.toBlob(function(blob){
-          var newName=datePrefix+'-'+originName;
           state.zip.file(newName, blob);
           state.processedCount++;
-          const oriNote = orientationLabel(orientation);
-          println("<span class='ok'>✓</span> "+escapeHtml(newName)+"    <span class='muted'>"+escapeHtml(stamp)+" • "+source+(oriNote ? " • "+oriNote : "")+"</span>");
+
+          if (exifHadDate) {
+            const oriNote = orientationLabel(orientation);
+            var stamp = fmtDateForStamp(date);
+            println("<span class='ok'>✓</span> "+escapeHtml(newName)+"    <span class='muted'>"+escapeHtml(stamp)+(oriNote ? " • "+oriNote : "")+"</span>");
+          } else {
+            // No EXIF date -> warn, and say NO DATE AVAILABLE (exact text)
+            println("<span class='warn'>⚠</span> "+escapeHtml(newName)+" <span class='warn'>• NO DATE AVAILABLE</span>");
+          }
+
           resolve();
         }, targetType==='image/jpeg'?'image/jpeg':'image/png', 0.92);
       });
@@ -483,6 +498,10 @@
         println('0 images found');
         addResetAction();
         return;
+      }
+      // Ensure helper is present (defensive)
+      if (typeof expandZipsAndFilter !== 'function') {
+        throw new ReferenceError('expandZipsAndFilter is not defined');
       }
       var expanded = await expandZipsAndFilter(files);
       println(expanded.length+" images found");
@@ -523,7 +542,7 @@
     window.addEventListener('drop', async function(e){
       e.preventDefault(); e.stopPropagation();
       if(!isDropzoneVisible()) return;
-      showConsole(); // immediate feedback
+      showConsole();
       println("<span class='muted'>Reading items…</span>");
       try{
         var dt = e.dataTransfer || {};
@@ -543,7 +562,7 @@
     dropzone.addEventListener('drop', async function(e){
       e.preventDefault(); e.stopPropagation();
       dropzone.classList.remove('dragover'); dlog('dropzone drop');
-      showConsole(); // immediate feedback
+      showConsole();
       println("<span class='muted'>Reading items…</span>");
       try{
         var dt = e.dataTransfer || {};
@@ -564,7 +583,13 @@
       input.accept='.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.zip';
       input.style.position='fixed'; input.style.left='-9999px';
       document.body.appendChild(input);
-      input.addEventListener('change', async function(ev){ var files=Array.prototype.slice.call(ev.target.files||[]); dlog('picker files='+files.length); await handleFiles(files); input.remove(); }, {once:true});
+      input.addEventListener('change', async function(ev){
+        var files=Array.prototype.slice.call(ev.target.files||[]);
+        dlog('picker files='+files.length);
+        try { await handleFiles(files); }
+        catch(err){ println("<span class='err'>×</span> <span class='muted'>"+escapeHtml(String(err))+"</span>"); addResetAction(); }
+        input.remove();
+      }, {once:true});
       input.click();
     }, false);
 
