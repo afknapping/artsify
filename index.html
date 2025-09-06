@@ -23,22 +23,18 @@
       color: var(--fg);
       overflow: hidden;
     }
-    .app {
-      height: 100%;
-      width: 100%;
-      position: relative;
-    }
+    .app { height: 100%; width: 100%; position: relative; }
 
     /* DROPZONE */
     .dropzone {
       position: absolute;
-      inset: 16px; /* slight inset so rounded corners are visible */
+      inset: 16px;
       display: grid;
       place-items: center;
       background: radial-gradient(1200px 800px at 50% 50%, #151922 0%, #0d0f12 65%);
       border: 4px dashed #303846;
-      border-radius: 18px; /* slight rounding */
-      padding: 24px; /* breathing room */
+      border-radius: 18px;
+      padding: 24px;
       box-sizing: border-box;
       transition: opacity .35s ease, transform .35s ease;
       z-index: 3;
@@ -46,10 +42,10 @@
     .dropzone.hidden { opacity: 0; pointer-events: none; transform: scale(0.99); animation: none !important; }
     .dropzone p {
       font-family: var(--console-font);
-      font-weight: 900; /* extrabold */
+      font-weight: 900;
       font-variation-settings: 'wght' 900;
       letter-spacing: .12em;
-      font-size: clamp(14px, 1.7vw, 18px); /* match console size */
+      font-size: clamp(14px, 1.7vw, 18px);
       margin: 0;
       color: #dfe7ff;
       text-shadow: 0 2px 0 #000;
@@ -76,15 +72,12 @@
     .link {
       color: #dfe7ff;
       text-decoration: none;
-      font-weight: 900; /* extrabold */
+      font-weight: 900;
       font-variation-settings: 'wght' 900;
       margin: 0; padding: 0;
       border-bottom: 2px solid transparent;
     }
     .link:hover { border-bottom-color: currentColor; }
-
-    /* Hide the helper input but keep it accessible for click */
-    #fileInput { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
 
     /* ===== CRT-style subtle flicker ===== */
     @keyframes crt-flicker {
@@ -96,9 +89,7 @@
       0%   { background-position: 0 0; }
       100% { background-position: 0 8px; }
     }
-    /* Apply gentle, fast-ish flicker to both states */
     .console, .dropzone { animation: crt-flicker 0.11s steps(2, end) infinite; }
-    /* Very subtle noise/scan overlay for a tube-like feel */
     .app::after {
       content: "";
       position: absolute;
@@ -120,10 +111,14 @@
   <div class="app" id="app">
     <div class="dropzone" id="dropzone" tabindex="0" aria-label="Drop images, folders, or zips here">
       <p>DROP</p>
-      <input id="fileInput" type="file" multiple webkitdirectory directory />
+      <!-- removed unused hidden input -->
     </div>
     <div class="console" id="console" role="log" aria-live="polite"></div>
   </div>
+
+  <!-- Load fallbacks FIRST to avoid race conditions -->
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/utif@3.0.0/UTIF.min.js"></script>
 
   <!-- Dependencies: JSZip & EXIFR (for EXIF reading) -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -137,7 +132,6 @@
     var $ = function(s){ return document.querySelector(s); };
     var dropzone = $('#dropzone');
     var logEl = $('#console');
-    var TZ = 'Europe/Berlin';
     var DEBUG = true;
 
     var IMAGES_EXT = ['jpg','jpeg','png','webp','gif','bmp','tif','tiff','heic','heif'];
@@ -158,43 +152,42 @@
     function isImageName(name){ return IMAGES_EXT.indexOf(extOf(name))>-1; }
     function mimeFromName(name){ var e=extOf(name); var map={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',bmp:'image/bmp',tif:'image/tiff',tiff:'image/tiff',heic:'image/heic',heif:'image/heif'}; return map[e]||'application/octet-stream'; }
 
-    function fmtDateForStamp(d){ var m=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']; return m[d.getMonth()]+' '+String(d.getDate()).padStart(2,'0')+', '+d.getFullYear(); }
-    function fmtDateFileYYYYMMDD(d){ var yyyy=d.getFullYear(); var mm=String(d.getMonth()+1).padStart(2,'0'); var dd=String(d.getDate()).padStart(2,'0'); return yyyy+'-'+mm+'-'+dd; }
-    function fmtNowForZipName(){ var fmt=new Intl.DateTimeFormat('en-GB',{ timeZone:TZ, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); var parts={}; fmt.formatToParts(new Date()).forEach(function(p){ parts[p.type]=p.value; }); return parts.year+'-'+parts.month+'-'+parts.day+'-'+parts.hour+'-'+parts.minute; }
+    // LOCAL time everywhere
+    function fmtDateForStamp(d){
+      var m=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      return m[d.getMonth()]+' '+String(d.getDate()).padStart(2,'0')+', '+d.getFullYear();
+    }
+    function fmtDateFileYYYYMMDD(d){
+      var yyyy=d.getFullYear();
+      var mm=String(d.getMonth()+1).padStart(2,'0');
+      var dd=String(d.getDate()).padStart(2,'0');
+      return yyyy+'-'+mm+'-'+dd;
+    }
+    function fmtNowForZipName(){
+      var now=new Date();
+      var yyyy=now.getFullYear();
+      var mm=String(now.getMonth()+1).padStart(2,'0');
+      var dd=String(now.getDate()).padStart(2,'0');
+      var hh=String(now.getHours()).padStart(2,'0');
+      var mi=String(now.getMinutes()).padStart(2,'0');
+      return yyyy+'-'+mm+'-'+dd+'-'+hh+'-'+mi;
+    }
+    function toLocalDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 
     // ===== INPUT EXPANSION =====
     function walkEntry(entry){ return new Promise(function(resolve){ if(entry.isFile){ entry.file(function(f){ resolve([f]); }); } else if(entry.isDirectory){ var dirReader=entry.createReader(); var files=[]; var read=function(){ dirReader.readEntries(function(entries){ if(!entries.length) return resolve(files); var i=0; (function next(){ if(i>=entries.length){ read(); return; } walkEntry(entries[i++]).then(function(arr){ files = files.concat(arr); next(); }); })(); }); }; read(); } else { resolve([]); } }); }
 
     async function gatherDroppedFiles(dt){
-      // Deterministically collect from all available sources
       const out = [];
-
-      // 1) Direct files list (most reliable across browsers)
       const byFiles = Array.from((dt && dt.files) ? dt.files : []);
       out.push(...byFiles);
-
-      // 2) Items → getAsFile (plain files)
       const items = Array.from((dt && dt.items) ? dt.items : []);
-      for (const it of items) {
-        if (it.kind === 'file' && it.getAsFile) {
-          const f = it.getAsFile(); if (f) out.push(f);
-        }
-      }
-
-      // 3) Items → webkitGetAsEntry (folders in Chromium/Safari)
+      for (const it of items) { if (it.kind === 'file' && it.getAsFile) { const f = it.getAsFile(); if (f) out.push(f); } }
       const entryTasks = [];
-      for (const it of items) {
-        const entry = it.webkitGetAsEntry && it.webkitGetAsEntry();
-        if (entry) entryTasks.push(walkEntry(entry));
-      }
-      if (entryTasks.length) {
-        const nested = await Promise.all(entryTasks);
-        nested.flat().forEach(f => out.push(f));
-      }
-
-      // De-dupe by name+size
+      for (const it of items) { const entry = it.webkitGetAsEntry && it.webkitGetAsEntry(); if (entry) entryTasks.push(walkEntry(entry)); }
+      if (entryTasks.length) { const nested = await Promise.all(entryTasks); nested.flat().forEach(f => out.push(f)); }
       const seen = new Set();
-      const dedup = out.filter(f => { const k = (f && f.name ? f.name : 'noname') + '|' + (f && f.size ? f.size : 0); if (seen.has(k)) return false; seen.add(k); return true; });
+      const dedup = out.filter(f => { const k = (f && f.name ? f.name : 'noname') + '|' + (f && f.size ? f.size : 0) + '|' + (f && f.lastModified ? f.lastModified : 0); if (seen.has(k)) return false; seen.add(k); return true; });
       dlog('gatherDroppedFiles → ' + dedup.length);
       return dedup;
     }
@@ -229,39 +222,39 @@
       });
     }
 
-    // ===== DATES =====
-    function getBestDate(file){
+    // ===== DATES (local) + EXIF ORIENTATION =====
+    function getBestDateAndExif(file){
       return new Promise(async function(resolve){
-        function normalizeUTCDate(d){ return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())); }
-        function parseExifDate(raw){
-          if (raw && raw instanceof Date && !isNaN(+raw)) return raw;
+        function parseExifLocalDay(raw){
+          if (raw && raw instanceof Date && !isNaN(+raw)) return toLocalDay(raw);
           if (typeof raw === 'string'){
-            // EXIF-style: YYYY:MM:DD HH:MM:SS (take just the date part)
             var m = /(\d{4}):(\d{2}):(\d{2})/.exec(raw);
-            if (m) return new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+            if (m) return new Date(+m[1], +m[2]-1, +m[3]); // local midnight
             var t = Date.parse(raw);
-            if (!isNaN(t)) return new Date(t);
+            if (!isNaN(t)) { var d=new Date(t); return toLocalDay(d); }
           }
           return null;
         }
-        // 1) Prefer EXIF date
+        var orientation = 1;
+
         try {
           if (window.exifr && exifr.parse){
             var data = await exifr.parse(file, { tiff:true, exif:true });
+            orientation = (data && data.Orientation) ? data.Orientation : 1;
             var raw = data && (data.DateTimeOriginal || data.CreateDate || data.ModifyDate);
-            var exifDate = parseExifDate(raw);
+            var exifDate = parseExifLocalDay(raw);
             if (exifDate){
-              return resolve({ date: normalizeUTCDate(exifDate), source: 'EXIF' });
+              return resolve({ date: exifDate, source: 'EXIF', orientation: orientation });
             }
           }
-        } catch(e) { /* ignore and fall back */ }
-        // 2) Fallback: file timestamp (no filename guessing)
+        } catch(e) { /* fall through */ }
+
         var ts = new Date(file && file.lastModified ? file.lastModified : Date.now());
-        return resolve({ date: normalizeUTCDate(ts), source: 'FILE' });
+        return resolve({ date: toLocalDay(ts), source: 'FILE', orientation: orientation });
       });
     }
 
-    // ===== DECODE & RENDER =====
+    // ===== DECODE =====
     function loadAsImageBitmapOrMagick(file){
       return new Promise(async function(resolve, reject){
         var name = (file && file.name || '').toLowerCase();
@@ -285,22 +278,19 @@
           return '';
         }
 
-        // 1) createImageBitmap (fast path)
         try{ var img1 = await createImageBitmap(file);  return resolve({ image: img1, type: file.type || mimeFromName(file.name) }); }catch(e){ dlog('decode: createImageBitmap failed'); }
-        // 2) HTMLImageElement fallback
         try{
           var url = URL.createObjectURL(file);
           var img2 = new Image();
           img2.onload = function(){ URL.revokeObjectURL(url); dlog('decode: HTMLImageElement'); resolve({ image: img2, type: file.type || mimeFromName(file.name) }); };
           img2.onerror = function(){ URL.revokeObjectURL(url); (async()=>{ try { await afterHtmlImgFail(); } catch(e){ reject(e); } })(); };
           img2.src = url;
-          return; // wait for onload/onerror
+          return;
         }catch(e){ /* fall through */ }
 
         async function afterHtmlImgFail(){
           const kind = await sniffKind(file);
           dlog('decode: sniff kind='+kind+' ext='+ext+' mime='+(file.type||''));
-          // HEIC/HEIF via heic2any
           if (((ext==='heic'||ext==='heif') || kind==='heic') && window.heic2any) {
             try {
               dlog('decode: heic2any fallback');
@@ -310,7 +300,6 @@
               return;
             } catch(e) { dlog('heic2any failed: '+String(e)); }
           }
-          // TIFF via UTIF
           if (((ext==='tif'||ext==='tiff') || kind==='tiff') && window.UTIF) {
             try {
               dlog('decode: UTIF fallback');
@@ -331,27 +320,115 @@
               }
             } catch(e) { dlog('UTIF failed: '+String(e)); }
           }
-          // Last resort
           reject(new Error('Unsupported or corrupt image; tried browser, HEIC, TIFF decoders.'));
         }
       });
     }
 
+    // ===== EXIF ORIENTATION → canvas transform =====
+    function applyOrientationTransform(ctx, orientation, w, h, ow, oh){
+      // ctx is already translated to top-left of content area (border, border)
+      switch (orientation) {
+        case 2: // mirror horizontal
+          ctx.translate(ow, 0); ctx.scale(-1, 1); break;
+        case 3: // rotate 180
+          ctx.translate(ow, oh); ctx.rotate(Math.PI); break;
+        case 4: // mirror vertical
+          ctx.translate(0, oh); ctx.scale(1, -1); break;
+        case 5: // mirror horizontal + rotate 270 CW (transpose)
+          ctx.rotate(0.5 * Math.PI);
+          ctx.scale(1, -1);
+          break;
+        case 6: // rotate 90 CW
+          ctx.rotate(0.5 * Math.PI);
+          ctx.translate(0, -oh);
+          break;
+        case 7: // mirror horizontal + rotate 90 CW (transverse)
+          ctx.rotate(0.5 * Math.PI);
+          ctx.translate(ow, -oh);
+          ctx.scale(-1, 1);
+          break;
+        case 8: // rotate 90 CCW
+          ctx.rotate(-0.5 * Math.PI);
+          ctx.translate(-ow, 0);
+          break;
+        default: /* 1: no transform */ break;
+      }
+    }
+
+    // Orientation label for logging (hide "Horizontal (normal)")
+    function orientationLabel(orientation){
+      switch (orientation) {
+        case 2: return 'ORI:Mirrored horizontal';
+        case 3: return 'ORI:Rotated 180°';
+        case 4: return 'ORI:Mirrored vertical';
+        case 5: return 'ORI:Mirrored horizontal + Rotated 270°';
+        case 6: return 'ORI:Rotated 90° CW';
+        case 7: return 'ORI:Mirrored horizontal + Rotated 90°';
+        case 8: return 'ORI:Rotated 90° CCW';
+        default: return ''; // 1 -> hide
+      }
+    }
+
     function processOne(item){
       return new Promise(async function(resolve){
         var file=item.file, originName=item.originName;
-        var best = await getBestDate(file); var date=best.date, source=best.source;
-        var stamp = fmtDateForStamp(date); var datePrefix = fmtDateFileYYYYMMDD(date);
-        var decoded = await loadAsImageBitmapOrMagick(file); var image=decoded.image, type=decoded.type;
-        var w=image.width, h=image.height; var shorter=Math.min(w,h);
-        var border=Math.max(1, Math.round(0.02*shorter)); var textPx=Math.max(8, Math.round(0.5*border));
-        var canvas=document.createElement('canvas'); canvas.width=w+border*2; canvas.height=h+border*2; var ctx=canvas.getContext('2d');
-        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.drawImage(image, border, border, w, h);
-        ctx.fillStyle='#000000'; ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible"+', '+"Atkinson Hyperlegible Next"+', system-ui, sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle';
-        var xRight=border+w; var yCenterBottomBorder=canvas.height - border/2; ctx.fillText(stamp, xRight, yCenterBottomBorder);
+
+        // date + exif orientation (local time)
+        var best = await getBestDateAndExif(file);
+        var date=best.date, source=best.source, orientation=best.orientation;
+
+        var stamp = fmtDateForStamp(date);
+        var datePrefix = fmtDateFileYYYYMMDD(date);
+
+        var decoded = await loadAsImageBitmapOrMagick(file);
+        var image=decoded.image, type=decoded.type;
+
+        var w=image.width, h=image.height;
+        var swap = (orientation>=5 && orientation<=8);
+        var ow = swap ? h : w; // oriented width
+        var oh = swap ? w : h; // oriented height
+
+        var shorter=Math.min(ow,oh);
+        var border=Math.max(1, Math.round(0.02*shorter));
+        var textPx=Math.max(8, Math.round(0.5*border));
+
+        // size guard (optional, prevents giant crashes)
+        if (ow*oh > 50_000_000 || Math.max(ow, oh) > 16384) {
+          println("<span class='skip'>↷</span> "+escapeHtml(originName)+" <span class='muted'>(too large; skipped)</span>");
+          return resolve();
+        }
+
+        var canvas=document.createElement('canvas');
+        canvas.width=ow+border*2; canvas.height=oh+border*2;
+        var ctx=canvas.getContext('2d');
+
+        // white border background
+        ctx.fillStyle='#ffffff';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        // draw oriented image inside border
+        ctx.save();
+        ctx.translate(border, border);
+        applyOrientationTransform(ctx, orientation, w, h, ow, oh);
+        ctx.drawImage(image, 0, 0, w, h);
+        ctx.restore();
+
+        // stamp text (unrotated; bottom-right on the outer border)
+        ctx.fillStyle='#000000';
+        ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible"+', '+"Atkinson Hyperlegible Next"+', system-ui, sans-serif';
+        ctx.textAlign='right'; ctx.textBaseline='middle';
+        var xRight=canvas.width - border; var yCenterBottomBorder=canvas.height - border/2;
+        ctx.fillText(stamp, xRight, yCenterBottomBorder);
+
         var targetType=/jpe?g/i.test(originName)?'image/jpeg':(type||'image/png');
         canvas.toBlob(function(blob){
-          var newName=datePrefix+'-'+originName; state.zip.file(newName, blob); state.processedCount++; println("<span class='ok'>✓</span> "+escapeHtml(newName)+"    <span class='muted'>"+escapeHtml(stamp)+" • "+source+"</span>"); resolve();
+          var newName=datePrefix+'-'+originName;
+          state.zip.file(newName, blob);
+          state.processedCount++;
+          const oriNote = orientationLabel(orientation);
+          println("<span class='ok'>✓</span> "+escapeHtml(newName)+"    <span class='muted'>"+escapeHtml(stamp)+" • "+source+(oriNote ? " • "+oriNote : "")+"</span>");
+          resolve();
         }, targetType==='image/jpeg'?'image/jpeg':'image/png', 0.92);
       });
     }
@@ -377,7 +454,7 @@
       var div=document.createElement('div'); div.className='line actions';
       var aDL=document.createElement('a'); aDL.className='link'; aDL.textContent='DOWNLOAD'; aDL.href=url; aDL.download=zipName;
       var aRS=document.createElement('a'); aRS.className='link'; aRS.textContent='RESET'; aRS.href='#'; aRS.addEventListener('click', function(e){ e.preventDefault(); resetAll(); });
-      div.appendChild(aDL); div.appendChild(document.createTextNode('   |   ')); div.appendChild(aRS); /* hard spaces */
+      div.appendChild(aDL); div.appendChild(document.createTextNode('   |   ')); div.appendChild(aRS);
       logEl.appendChild(div); logEl.scrollTop=logEl.scrollHeight;
     }
 
@@ -393,18 +470,15 @@
     // ===== DND + PICKER =====
     function isDropzoneVisible(){ return !dropzone.classList.contains('hidden'); }
 
-    // Prevent navigation
     window.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
     window.addEventListener('drop', async function(e){
       e.preventDefault(); e.stopPropagation();
-      if(!isDropzoneVisible()) return; // only handle when dropzone is shown
+      if(!isDropzoneVisible()) return;
       dlog('window drop');
       var dt = e.dataTransfer || {};
-      // Prefer direct files on drop (most reliable)
       var direct = Array.prototype.slice.call((dt.files||[]));
       var files = direct;
       if (!files.length && dt.items && dt.items.length){
-        // Fallback: items->getAsFile
         files = Array.prototype.slice.call(dt.items).map(function(it){ return it.getAsFile ? it.getAsFile() : null; }).filter(Boolean);
       }
       if (!files.length){ files = await gatherDroppedFiles(dt); }
@@ -413,7 +487,6 @@
       else { clearState(); showConsole(); println('0 images found'); addResetAction(); }
     }, false);
 
-    // Dropzone visuals + drop handling
     dropzone.addEventListener('dragenter', function(e){ e.preventDefault(); dropzone.classList.add('dragover'); dlog('dropzone dragenter'); }, false);
     dropzone.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
     dropzone.addEventListener('dragleave', function(e){ e.preventDefault(); dropzone.classList.remove('dragover'); dlog('dropzone dragleave'); }, false);
@@ -433,13 +506,18 @@
     }, false);
 
     // Manual picker
-    dropzone.addEventListener('click', function(){ dlog('open picker'); var input=document.createElement('input'); input.type='file'; input.multiple=true; input.webkitdirectory=true; input.setAttribute('directory',''); input.accept='.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.zip'; input.style.position='fixed'; input.style.left='-9999px'; document.body.appendChild(input); input.addEventListener('change', async function(ev){ var files=Array.prototype.slice.call(ev.target.files||[]); dlog('picker files='+files.length); if(files.length) await handleFiles(files); input.remove(); }, {once:true}); input.click(); }, false);
+    dropzone.addEventListener('click', function(){
+      dlog('open picker');
+      var input=document.createElement('input');
+      input.type='file'; input.multiple=true; input.webkitdirectory=true; input.setAttribute('directory','');
+      input.accept='.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.zip';
+      input.style.position='fixed'; input.style.left='-9999px';
+      document.body.appendChild(input);
+      input.addEventListener('change', async function(ev){ var files=Array.prototype.slice.call(ev.target.files||[]); dlog('picker files='+files.length); if(files.length) await handleFiles(files); input.remove(); }, {once:true});
+      input.click();
+    }, false);
 
   })();
 </script>
-  <!-- Add HEIC/HEIF decoder fallback -->
-  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-  <!-- Add TIFF decoder fallback (UTIF) -->
-  <script src="https://cdn.jsdelivr.net/npm/utif@3.0.0/UTIF.min.js"></script>
 </body>
 </html>
