@@ -1,855 +1,418 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bordered & Dated Photo Prep</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ARTSIFY – drop → artsify → zip</title>
+  <!-- Google Fonts: Workbench (console) & Atkinson Hyperlegible Next (timestamp) -->
+  <link href="https://fonts.googleapis.com/css2?family=Workbench:wght@400..900&family=Atkinson+Hyperlegible+Next:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f12;
+      --fg: #e6e6e6;
+      --muted: #8a8f98;
+      --accent: #40d16a;
+      --danger: #ff6b6b;
+      --console-font: 'Workbench', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      --stamp-font: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, sans-serif;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      overflow: hidden;
+    }
+    .app {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
 
-<!-- Favicons -->
-<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABtklEQVR4nI2SscrqMBTHT9LU4laog4hiQaSIg4Pubj6As+/iqpuLvoGDY32E4Nalg4tQ0VKosx3a0qQ535CL98K9fPf7TyfnnOT/y0nI8/m83W7wM3meB77vZ1mGP1CWZb7vM9u2lVKr1QoR9TGISAjJ85wQ0mw2dZIQst/vbdsGznkcx3+7t9ttx3H+zMRxzDlnAEAptSyrrmtCiBBCd79er/f73el0hBCIaBgGpRQAmN4tpUREpdRyuRyNRpvN5nQ6xXGc57lhGHVdf4CBc54kiWEYhBAACIKgrutWq6WrHyrDMJIk4ZxTvWaMIeJisZjNZpTS9XoNAP1+PwiC8XhMCNE8vx1M0wSAy+WCiFLKqqp6vd7hcEDE/sY9AwKBgKWUEMfxfD6f91dRFI+ioBQCqqoKh8NGo6CqGIZRSrVZL0zQFEbBaLVa+KNsP4H4BuJz2JSMAIUSyrmsnSRJf7/fr9TNE0Pd8jwLEsM03T7Xa7Ylsmk2EYy7IMx3FuEwqFQghJSuM4SZIYhr/0N2UoigJ++oPZ5bKu63K5sN/vpaIoiqL8D/P9LoBCr9frdmORSTar1er9v2LB6KR9stms/ldTdMwDMv1+gZBkEVRVlcQAAAAAElFTkSuQmCC">
-<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAACmUlEQVR4nO2VS2gUURSHv6VCqVStRSsXG2wi9ZMXCBi8NF4kNngTiQYbiAj+gdgGUtxs24ixhSzWshk9YlNghuAxhRFGXmxvFmlMk3YNOYkKXZ5YbFUpSRzJ+97zXubqTrdc0rV6V5X55xz7jCul8vN6Hg8jnvEzpdFqtRa5WKxSsbD5d1uX+N+K3uC4XAIAMuMfZTQa9WWz2aF+kslkQpSUZn+b67wFkUdPA3dzY7nAo2hVj+zafPl+w83RmkVCuVu/Nb5n7cRP3b2tYHOdjNRn1az2VxpQ6HQ76Em1uP7j3h7iR4WZmtPlYKwOW5MJ4r4X1VVXooh5AIeT2a+vb0VQKVS1HOSxM71lY+SHsBAaR0eduzfTXtgIx5cH7hVxhlLezEk/MYimHZbxb/jKMKHt/Jscj9UD09P3Rx43hYddsiKePyUN/qX9D2QU2D73FeXJ5fKYqrCcn8CC0GPzjqBMR1VEc8vGzfc6TdzIGW+iVXGWhMXDRRZ9wOukEd6N1MqlU8hQVRL/XSHpXkCMCoUCnpPpaAsjGYRseRRiUBo0gyoHrTq0hGQIcL0cZQpKFeLBjc6/TSU3f2xQHx8FgJFD1foz9yOnjB5IdgcF31MaYwyjNqSW+KAw4ybLhKaI/DbVbrC2WMRp6+Z5oXH1dyNoEN/muOyFukPXgQYM8eB3GyzUsQxmoO4z8byKuMrvQ65UlcEp/gNPAj2Av7DpgV4R9C3r4RfAaPFfL3SwOk5vF7oFWQ1v4j6W7Bk5BGeY9n0+qv30n2IQ1dr4x7Y9/QQjMuzp6cv0gAAAABJRU5ErkJggg==">
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACp+jQDAAADzUlEQVR4nO2dS4gUURhGVxGzFsuIFq1YMXQXm+CWtm4QLEgiokWExT8JGe0P+JeQkHtEJA0tRGxV/8DFnCkZlMk5h79A+2k7L73s7OzM8YB1AphI4aY2Z+OcPnZ2dn2/2i/mBWrEc4wmtIs1oFEaoNMUwiR0bDCd7ZBZjsUYjVkMqzRGFVjvskh1EY7vTUHMMxRKzjD0oCvTdPOh2fE3jT3tUCeE/ehMWJfVSBhBi8No6vE7SQeU3R1TTjI+QOJ1wn8j1vF+ty9X6kZ2KMSirA1LxKODMaReNo84Dpdv0jsEC53k2OZGrlXomWEz6m3LSoj4sDXqUZ7ZMo65iUuzM55XGg9Vx1EYx6k24iHD0WvJYk9EDOKuEGeRR8cYkHGuFa7oQ9H/RX3IujvWMW3qkSfxPh7uLBWm+dYwrjNN3md42kKPfRXu0pYy0V84fGy0F0/HiM+9OXY3wnC9j6y1TaCmkn2MEsZrk7gZH8tw0mC0ovqgPRyApZNYZ/V0cs9exEPVglb3rt+3P7/N61yx9L7hRGK80zjDRIs3KsGyXXEerOWFhKnt+0Gj0H9FLTWD98gmFMVEfe2oV2EQbRhZDEpC8aG0uZpYPwrU1j3u2V6WBtRnOO9N3zKv8m6mfoWqKrweuzSB6Aw7vcz+RQwlpj/qglFnSxkh5nlg2f77A1t5VOw4tIvtGLx0tkdL09Cr7LM4/0Xd6Ky1n6X0tnoje6Nn2VupHyQfcXt5kF+KEMu1CeIlj5IcoFbQbTeBYjr5YBGgn6c4QaqU0JxhTNnqjfTL++pE0s9OdYO4Nj2Id7z9YJz4HEy4eJvP+4G57eBj1I8xj/nQenZ0EkxkLloJDruEMnZ+hrSQtMuIR8cHVmLSlgy/9VHSbBLhGZ8TzPSLcpQcuEe4wE/5Pp8trPueDlbwLuPP9RJpSUtQNG9zJFXNRXhOPOQjHt9ITLspHnDtbX9kCOHWhcFg7SReZKzQxr1E5wVKmTiZRHZlEbZHreRPEztcnPVu9dlfHep7UzzTpg4nVYnsjKx8GnQ9zn+PyJjRH9jhMMaFO0fSDZTSi5RVZ34RDj2NWloJzdT7hmQIPVWrE4yOjDrss8MdrA9q7JkqIMiNxNJy2AvP07QqHwL9LBo+x1N8krt1XKuIV5uk3rJcRy/6DLX9l/9uWxLrrFMY1S6Y8u9bydNNzkngEQ/LsuFYhYprSoI6Y6WZ07FZy0gCeEPfOeMHszZlmEa9RcXITjM9wQLhXz1qSok3kxx01/YVaqZT0iGzwUAAAAASUVORK5CYII=">
+    /* DROPZONE */
+    .dropzone {
+      position: absolute;
+      inset: 16px; /* slight inset so rounded corners are visible */
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 800px at 50% 50%, #151922 0%, #0d0f12 65%);
+      border: 4px dashed #303846;
+      border-radius: 18px; /* slight rounding */
+      padding: 24px; /* breathing room */
+      box-sizing: border-box;
+      transition: opacity .35s ease, transform .35s ease;
+      z-index: 3;
+    }
+    .dropzone.hidden { opacity: 0; pointer-events: none; transform: scale(0.99); }
+    .dropzone p {
+      font-family: var(--console-font);
+      font-weight: 900; /* extrabold */
+      font-variation-settings: 'wght' 900;
+      letter-spacing: .12em;
+      font-size: clamp(14px, 1.7vw, 18px); /* match console size */
+      margin: 0;
+      color: #dfe7ff;
+      text-shadow: 0 2px 0 #000;
+      user-select: none;
+    }
+    .dropzone.dragover { border-color: #4bff9b; box-shadow: 0 0 0 8px rgba(75,255,155,0.08) inset; }
 
-<!-- Fonts: UI + Mono for filenames -->
-<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next+Mono:wght@700&display=swap" rel="stylesheet">
+    /* CONSOLE */
+    .console {
+      position: absolute; inset: 0; overflow: auto; padding: 28px 28px 80px;
+      font-family: var(--console-font);
+      background: repeating-linear-gradient(#0f131a 0 2px, transparent 2px 40px),
+                  linear-gradient(180deg, #0a0d11, #0d1016);
+      line-height: 1.55;
+      display: none;
+    }
+    .console.visible { display: block; }
+    .line { white-space: pre-wrap; word-break: break-word; font-size: clamp(14px, 1.7vw, 18px); }
+    .muted { color: var(--muted); }
+    .ok { color: var(--accent); font-weight: 700; }
+    .skip { color: #93a1b3; }
+    .err { color: var(--danger); }
+    .actions { margin-top: 22px; }
+    .link {
+      color: #dfe7ff;
+      text-decoration: none;
+      font-weight: 900; /* extrabold */
+      font-variation-settings: 'wght' 900;
+      margin-right: 24px;
+      border-bottom: 2px solid transparent;
+    }
+    .link:hover { border-bottom-color: currentColor; }
 
-<style>
-  :root { --bg:#0b0c10; --fg:#e8e8e8; --muted:#aeb4bd; --accent:#62d0ff; --card:#15171c; --ok:#5bd67a; --warn:#ffcc66; --err:#ff6b6b; }
-  body {
-    margin:0;
-    font:14px/1.4 "Atkinson Hyperlegible Next", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-    background:var(--bg); color:var(--fg);
-  }
-  header { padding:20px; border-bottom:1px solid #1f2229; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
-  header h1 { font-size:18px; margin:0; font-weight:650; }
-  main { max-width:1100px; margin:24px auto; padding:0 16px 80px; }
-  .card { background:var(--card); border:1px solid #1f2229; border-radius:10px; padding:16px; }
-  .row-right { display:flex; justify-content:flex-end; }
+    /* Hide the helper input but keep it accessible for click */
+    #fileInput { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
 
-  label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
-  input[type="number"] { width:110px; padding:8px; border-radius:8px; border:1px solid #2a2f38; background:#0f1216; color:#e8e8e8; font-family:"Atkinson Hyperlegible Next", sans-serif; }
-  input[type="checkbox"] { transform: translateY(1px); }
-  .check { display:flex; align-items:center; gap:8px; color:#d6dde6; }
-  .btn { appearance:none; border:1px solid #2a2f38; background:#0f1216; color:#e8e8e8; padding:10px 14px; border-radius:10px; cursor:pointer; font-family:"Atkinson Hyperlegible Next", sans-serif; }
-  .btn.primary { background:var(--accent); color:#061018; font-weight:700; border-color:#45bdea; }
-  .btn:disabled { opacity:.5; cursor:not-allowed; }
-  .muted { color:var(--muted); }
-
-  /* Progress + log */
-  .progress { margin-top:14px; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; overflow:hidden; height:10px; }
-  .bar { height:100%; width:0%; background:linear-gradient(90deg,#62d0ff,#8ef0b3); transition:width .2s ease; }
-  #progressWrap { display:none; }
-  #log[data-test="console"] { margin-top:12px; white-space:pre-wrap; max-height:220px; overflow:auto; background:#0f1216; border:1px solid #2a2f38; border-radius:8px; padding:10px; display:none; }
-  #log .fname, .thumb .cap { font-family:"Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; color:#fff; }
-
-  /* Upload */
-  .dropwrap { position:relative; }
-  .dropzone { margin-top:14px; padding:18px; border:2px dashed #2a2f38; border-radius:10px; background:#0f1216; text-align:center; color:#cbd2dc; cursor:pointer; }
-  .dropzone.drag { border-color:#62d0ff; color:#62d0ff; background:#0f1216AA; }
-  .chooser { position:absolute; inset:auto 0 0 auto; transform:translateY(8px); display:none; gap:8px; background:#0f1216; border:1px solid #2a2f38; border-radius:10px; padding:10px; z-index:5; }
-  .chooser.show { display:flex; }
-  .chooser .btn { padding:8px 10px; }
-  .mobilepick { display:none; margin-top:8px; }
-
-  /* Settings */
-  details.settings { margin-bottom:16px; }
-  details.settings summary { cursor:pointer; user-select:none; padding:10px 12px; border:1px solid #2a2f38; border-radius:10px; background:#0f1216; color:#e8e8e8; font-weight:600; }
-  details.settings > .card { margin-top:10px; }
-  .checks { display:flex; flex-direction:column; gap:8px; width:100%; margin-top:8px; }
-
-  /* Gallery */
-  #previewSection { display:none; }
-  #gallery[data-test="gallery"] { margin-top:16px; display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
-  .thumb { border:1px solid #2a2f38; border-radius:10px; overflow:hidden; background:#0f1216; display:flex; flex-direction:column; }
-  .thumb .box { width:100%; aspect-ratio: 1 / 1; overflow:hidden; background:#0b0c10; }
-  .thumb .box button.open { all:unset; display:block; width:100%; height:100%; cursor:pointer; }
-  .thumb .box img { width:100%; height:100%; display:block; object-fit:contain; object-position:center; background:#0b0c10; }
-  .thumb .cap { padding:8px; font-size:12px; color:#b8c0cc; }
-
-  /* Footer / Download */
-  footer { position:fixed; inset:auto 0 0 0; padding:12px 16px; background:rgba(11,12,16,.8); border-top:1px solid #1f2229; backdrop-filter: blur(6px); display:flex; gap:12px; justify-content:center; }
-  a.download { color:#061018; background:var(--ok); border:1px solid #3fbf63; padding:10px 14px; border-radius:10px; font-weight:700; text-decoration:none; font-family:"Atkinson Hyperlegible Next", sans-serif; }
-  #dlbar { display:none; }
-
-  /* Lightbox */
-  .lightbox { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.9); z-index:9999; }
-  .lightbox.show { display:flex; }
-  .lb-stage { position:relative; max-width:95vw; max-height:90vh; display:flex; flex-direction:column; align-items:center; }
-  .lb-viewport { position:relative; width:95vw; max-width:95vw; height:85vh; max-height:85vh; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; z-index:1; }
-  .lb-img { max-width:95vw; max-height:85vh; object-fit:contain; user-select:none; }
-  .lb-cap { margin-top:8px; color:#dbe2ea; font-size:13px; text-align:center; max-width:90vw; z-index:1; font-family:"Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; }
-  .lb-close { position:absolute; top:-8px; right:-8px; background:#111; color:#eee; border:1px solid #333; border-radius:999px; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1; z-index:6; }
-  .lb-prev, .lb-next { position:absolute; top:50%; transform:translateY(-50%); background:#111a; color:#eee; border:1px solid #333; border-radius:999px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; }
-  .lb-prev { left:10px; }
-  .lb-next { right:10px; }
-</style>
+    
+  </style>
 </head>
 <body>
-  <header class="card">
-    <h1>📷 Bordered & Dated Photo Prep</h1>
-    <div class="muted">100% privacy – files do not leave your browser</div>
-  </header>
-
-  <main>
-    <details class="settings">
-      <summary>Settings</summary>
-      <section class="card">
-        <div class="row" style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end;">
-          <div>
-            <label for="shortSide">Short side (px)</label>
-            <input id="shortSide" type="number" min="64" step="1" value="3164" />
-          </div>
-          <div>
-            <label for="borderPct">Border (% of short side)</label>
-            <input id="borderPct" type="number" min="0.1" step="0.1" value="2" />
-          </div>
-          <div>
-            <label for="dpi">DPI metadata</label>
-            <input id="dpi" type="number" min="72" step="1" value="300" />
-          </div>
-        </div>
-        <div class="checks">
-          <label class="check"><input id="optSharpen" type="checkbox" />Sharpen after resize</label>
-          <label class="check"><input id="optGray" type="checkbox" />Grayscale</label>
-          <label class="check"><input id="optNoStrip" type="checkbox" />Keep metadata (disable strip)</label>
-          <label class="check"><input id="optNoSRGB" type="checkbox" />Keep original colorspace (disable sRGB)</label>
-        </div>
-        <small class="note">
-          Defaults: strips metadata, enforces sRGB, and writes DPI=300.<br>
-          If EXIF is missing, fallback is file’s <em>lastModified</em> timestamp.
-        </small>
-      </section>
-    </details>
-
-    <section class="card">
-      <div class="dropwrap" id="dropwrap">
-        <!-- Mobile-only picker -->
-        <div class="mobilepick" id="mobilePickWrap">
-          <label for="images">Pick images (camera roll / library)</label>
-          <input id="images" class="btn" type="file" accept="image/*" multiple />
-        </div>
-
-        <!-- Unified dropzone -->
-        <div id="drop" class="dropzone" data-test="dropzone">
-          Click or drop files here<br>
-          <small class="muted">Images or ZIP. On desktop you can also choose a whole folder.</small>
-        </div>
-
-        <!-- Desktop chooser -->
-        <div id="chooser" class="chooser" role="menu" aria-hidden="true">
-          <button class="btn" id="chooseFiles">Pick files (images/ZIP)</button>
-          <button class="btn" id="chooseFolder">Pick folder</button>
-        </div>
-
-        <!-- Hidden inputs -->
-        <input id="filesInput" type="file" accept="image/*,.zip" multiple style="display:none" data-test="files-input" />
-        <input id="folderInput" type="file" webkitdirectory multiple style="display:none" data-test="folder-input" />
-      </div>
-
-      <!-- Progress + Console -->
-      <div id="progressWrap" class="progress"><div class="bar" id="bar"></div></div>
-      <div id="log" aria-live="polite" data-test="console"></div>
-
-      <!-- Start button under console -->
-      <div class="row-right" style="margin-top:10px">
-        <button id="start" class="btn primary" style="display:none" data-test="start">Start</button>
-      </div>
-    </section>
-
-    <section id="previewSection" class="card" style="display:none">
-      <h3 style="margin-top:0">Previews</h3>
-      <div id="gallery" data-test="gallery"></div>
-    </section>
-  </main>
-
-  <footer id="dlbar" style="display:none">
-    <a id="dllink" class="download" data-test="download">Download ZIP with all images</a>
-  </footer>
-
-  <!-- Lightbox -->
-  <div id="lightbox" class="lightbox" aria-modal="true" role="dialog" data-test="lightbox">
-    <div class="lb-stage">
-      <button class="lb-close" title="Close" aria-label="Close" data-test="lb-close">&times;</button>
-      <div class="lb-viewport">
-        <img class="lb-img" alt="Preview"/>
-      </div>
-      <div class="lb-cap"></div>
-      <button class="lb-prev" title="Previous" aria-label="Previous" data-test="lb-prev">&#10094;</button>
-      <button class="lb-next" title="Next" aria-label="Next" data-test="lb-next">&#10095;</button>
+  <div class="app" id="app">
+    <div class="dropzone" id="dropzone" tabindex="0" aria-label="Drop images, folders, or zips here">
+      <p>DROP</p>
+      <input id="fileInput" type="file" multiple webkitdirectory directory />
     </div>
+    <div class="console" id="console" role="log" aria-live="polite"></div>
   </div>
+  
 
-  <!-- Libraries -->
-  <script src="https://unpkg.com/exifr/dist/lite.umd.js"></script>
-  <script src="https://unpkg.com/fflate/umd/index.js"></script>
-  <script type="module">
-    import * as Magick from 'https://knicknic.github.io/wasm-imagemagick/magickApi.js';
-    window.Magick = Magick;
-  </script>
+  <!-- Dependencies: JSZip & EXIFR (for EXIF reading) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
 
-  <!-- App Script -->
+  <!-- ImageMagick WASM (kept for decoding odd formats when canvas fails) -->
+  <!-- Make sure magick.wasm sits next to index.umd.cjs on the CDN path. -->
+  <script src="https://cdn.jsdelivr.net/npm/@imagemagick/magick-wasm@0.0.35/dist/magick.js"></script>
+
   <script>
   (function(){
-    const logEl = document.getElementById('log');
-    const progressWrap = document.getElementById('progressWrap');
-    const barEl = document.getElementById('bar');
-    const startBtn = document.getElementById('start');
+    'use strict';
 
-    const dropwrap = document.getElementById('dropwrap');
-    const drop = document.getElementById('drop');
-    const chooser = document.getElementById('chooser');
-    const chooseFilesBtn = document.getElementById('chooseFiles');
-    const chooseFolderBtn = document.getElementById('chooseFolder');
+    // ===== DOM & STATE =====
+    var $ = function(s){ return document.querySelector(s); };
+    var dropzone = $('#dropzone');
+    var logEl = $('#console');
+    var TZ = 'Europe/Berlin';
+    var DEBUG = true;
 
-    const filesInput = document.getElementById('filesInput');
-    const folderInput = document.getElementById('folderInput');
+    var IMAGES_EXT = ['jpg','jpeg','png','webp','gif','bmp','tif','tiff','heic','heif'];
+    var state = { queue: [], zip: new JSZip(), zipName: null, processedCount: 0, downloadUrl: null };
 
-    const mobilePickWrap = document.getElementById('mobilePickWrap');
-    const imagesInput = document.getElementById('images');
+    // ===== LOGGING =====
+    function println(html){ var div=document.createElement('div'); div.className='line'; div.innerHTML=html; logEl.appendChild(div); logEl.scrollTop=logEl.scrollHeight; }
+    function dlog(msg){ if(!DEBUG) return; var s='[ARTSIFY] '+msg; try{ console.debug(s); }catch(e){} println("<span class='muted'>"+escapeHtml(s)+"</span>"); }
 
-    const dlbar = document.getElementById('dlbar');
-    const dllink = document.getElementById('dllink');
-    const previewSection = document.getElementById('previewSection');
-    const gallery = document.getElementById('gallery');
+    // ===== UI =====
+    function showConsole(){ logEl.classList.add('visible'); dropzone.classList.add('hidden'); }
+    function showDrop(){ logEl.classList.remove('visible'); dropzone.classList.remove('hidden'); }
+    function clearState(){ if(state.downloadUrl) URL.revokeObjectURL(state.downloadUrl); state.queue=[]; state.zip=new JSZip(); state.zipName=null; state.processedCount=0; state.downloadUrl=null; logEl.innerHTML=''; }
 
-    // Lightbox
-    const lb = document.getElementById('lightbox');
-    const lbImg = lb.querySelector('.lb-img');
-    const lbCap = lb.querySelector('.lb-cap');
-    const lbClose = lb.querySelector('.lb-close');
-    const lbPrev = lb.querySelector('.lb-prev');
-    const lbNext = lb.querySelector('.lb-next');
+    // ===== UTILS =====
+    function escapeHtml(s){ var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}; return String(s).replace(/[&<>"']/g, function(ch){ return map[ch] || ch; }); }
+    function extOf(name){ name=name||''; var m=/(\.)([^.]+)$/.exec(name.toLowerCase()); return m?m[2]:''; }
+    function isImageName(name){ return IMAGES_EXT.indexOf(extOf(name))>-1; }
+    function mimeFromName(name){ var e=extOf(name); var map={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',bmp:'image/bmp',tif:'image/tiff',tiff:'image/tiff',heic:'image/heic',heif:'image/heif'}; return map[e]||'application/octet-stream'; }
 
-    // Constants
-    const SUP_EXT = ['jpg','jpeg','png','tif','tiff','bmp','gif'];
-    const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    function fmtDateForStamp(d){ var m=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']; return m[d.getMonth()]+' '+String(d.getDate()).padStart(2,'0')+', '+d.getFullYear(); }
+    function fmtDateFileYYYYMMDD(d){ var yyyy=d.getFullYear(); var mm=String(d.getMonth()+1).padStart(2,'0'); var dd=String(d.getDate()).padStart(2,'0'); return yyyy+'-'+mm+'-'+dd; }
+    function fmtNowForZipName(){ var fmt=new Intl.DateTimeFormat('en-GB',{ timeZone:TZ, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); var parts={}; fmt.formatToParts(new Date()).forEach(function(p){ parts[p.type]=p.value; }); return parts.year+'-'+parts.month+'-'+parts.day+'-'+parts.hour+'-'+parts.minute; }
 
-    // State
-    const previewItems = [];
-    const queuedFiles = []; // {name, fileLike, bytes}
-    let magickReady = false;
-    let processing = false;
-    let needClearOnNextQueue = false; // clear console once when new files are added after a run
+    // ===== INPUT EXPANSION =====
+    function walkEntry(entry){ return new Promise(function(resolve){ if(entry.isFile){ entry.file(function(f){ resolve([f]); }); } else if(entry.isDirectory){ var dirReader=entry.createReader(); var files=[]; var read=function(){ dirReader.readEntries(function(entries){ if(!entries.length) return resolve(files); var i=0; (function next(){ if(i>=entries.length){ read(); return; } walkEntry(entries[i++]).then(function(arr){ files = files.concat(arr); next(); }); })(); }); }; read(); } else { resolve([]); } }); }
 
-    // Robust download handling
-    let currentDownloadUrl = null;
-    function revokeDownloadUrl(){
-      if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null; }
-    }
-    function setDownloadLink(blob, filename, labelText){
-      revokeDownloadUrl();
-      currentDownloadUrl = URL.createObjectURL(blob);
-      dllink.href = currentDownloadUrl;
-      dllink.download = filename || 'download';
-      dllink.textContent = labelText || 'Download';
-      dlbar.style.display = 'flex';
-    }
-    function triggerDownloadFallback(href, filename){
-      try{
-        const a=document.createElement('a');
-        a.href=href; a.download=filename||'download';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      }catch{ window.open(href,'_blank'); }
-    }
-    dllink.addEventListener('click',(e)=>{
-      if (!dllink.href) return;
-      e.preventDefault();
-      triggerDownloadFallback(dllink.href, dllink.download || 'download');
-    });
-    window.addEventListener('beforeunload', revokeDownloadUrl);
+    async function gatherDroppedFiles(dt){
+      // Deterministically collect from all available sources
+      const out = [];
 
-    // UI toggles
-    function toggleUploadUI() {
-      mobilePickWrap.style.display = isMobile ? 'block' : 'none';
-      chooser.classList.remove('show');
-      chooser.setAttribute('aria-hidden', 'true');
-      chooser.style.removeProperty('display');
-    }
-    toggleUploadUI();
+      // 1) Direct files list (most reliable across browsers)
+      const byFiles = Array.from((dt && dt.files) ? dt.files : []);
+      out.push(...byFiles);
 
-    // Wait for Magick silently
-    (async function waitForMagick(){
-      while (!window.Magick || typeof window.Magick.Call !== 'function') {
-        await new Promise(r => setTimeout(r,100));
-      }
-      magickReady = true;
-      updateStartVisibility();
-    })();
-
-    // Helpers
-    function println(msg, color){
-      logEl.style.display='block';
-      const div=document.createElement('div');
-      if(color) div.style.color=color;
-      div.innerHTML=msg; // allow <span class="fname">
-      logEl.appendChild(div);
-      logEl.scrollTop=logEl.scrollHeight;
-    }
-    function clearLog(){ logEl.textContent=''; logEl.style.display='none'; }
-    function setProgress(a,b){ barEl.style.width=(b?Math.round(a/b*100):0)+'%'; }
-    function sanitizeBase(name){ return (name||'').replace(/^.*[\\/]/,'').replace(/\.[^.]+$/,'').replace(/[^\w\-]+/g,'_'); }
-    function fmtDateLabel(d){ return `${MONTHS[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')}, ${d.getFullYear()}`; }
-    async function readAsUint8(f){ return new Uint8Array(await f.arrayBuffer()); }
-    async function ensureLabelFont(px=16){ if (!('fonts' in document)) return; try{ await document.fonts.ready; await document.fonts.load(`700 ${px}px "Atkinson Hyperlegible Next"`); await document.fonts.load(`700 ${px}px "Atkinson Hyperlegible Next Mono"`);}catch{} }
-    const isBadPath = (n) => (n||'').startsWith('__MACOSX/') || (n||'').startsWith('.') || (n||'').includes('/.');
-    const isImageName = (n) => SUP_EXT.includes(((n||'').split('.').pop()||'').toLowerCase());
-
-    // ---- Preview / lightbox reset helpers ----
-    function revokePreviewUrls() {
-      try { for (const it of previewItems) { if (it && it.url) URL.revokeObjectURL(it.url); } } catch {}
-    }
-    let currentIndex = -1;
-    function clearPreviewsUI() {
-      revokePreviewUrls();
-      previewItems.length = 0;
-      gallery.innerHTML = '';
-      previewSection.style.display = 'none';
-      if (lb.classList.contains('show')) {
-        lb.classList.remove('show');
-        lbImg.src = '';
-        currentIndex = -1;
-      }
-    }
-
-    // DnD: prevent default browser behavior globally
-    ['dragenter','dragover','dragleave','drop'].forEach(ev=>{
-      window.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); }, false);
-      document.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); }, false);
-    });
-    // Dropzone highlight
-    drop.addEventListener('dragenter', ()=> drop.classList.add('drag'));
-    drop.addEventListener('dragover', ()=> drop.classList.add('drag'));
-    drop.addEventListener('dragleave', ()=> drop.classList.remove('drag'));
-    drop.addEventListener('drop', async (e)=>{
-      drop.classList.remove('drag');
-      await handleFileList([...(e.dataTransfer.files||[])], {logContext:'drag & drop'});
-    });
-
-    // Click behavior
-    drop.addEventListener('click', ()=>{
-      if (isMobile) {
-        imagesInput.click();
-      } else {
-        chooser.style.removeProperty('display');
-        chooser.classList.toggle('show');
-        chooser.setAttribute('aria-hidden', chooser.classList.contains('show') ? 'false' : 'true');
-      }
-    });
-    // Close chooser when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!dropwrap.contains(e.target) && chooser.classList.contains('show')) {
-        chooser.classList.remove('show');
-        chooser.setAttribute('aria-hidden', 'true');
-      }
-    });
-    // Desktop chooser buttons
-    chooseFilesBtn.addEventListener('click', ()=>{ chooser.classList.remove('show'); chooser.setAttribute('aria-hidden','true'); filesInput.click(); });
-    chooseFolderBtn.addEventListener('click', ()=>{ chooser.classList.remove('show'); chooser.setAttribute('aria-hidden','true'); folderInput.click(); });
-
-    // Queue + logging
-    function queueSize(){ return queuedFiles.length; }
-    function updateStartVisibility(){
-      const show = magickReady && !processing && queueSize()>0;
-      startBtn.style.display = show ? 'inline-block' : 'none';
-      startBtn.disabled = !show;
-    }
-
-    async function unzipFiles(zipFile){
-      const buf=new Uint8Array(await zipFile.arrayBuffer());
-      const entries=fflate.unzipSync(buf);
-      const out=[];
-      for(const [n,bytes] of Object.entries(entries)){
-        if (isBadPath(n)) continue;
-        if (!isImageName(n)) continue;
-        if (!(bytes instanceof Uint8Array) || !bytes.length) continue;
-        const mime = (()=>{
-          const ext=(n.split('.').pop()||'').toLowerCase();
-          if (ext==='png') return 'image/png';
-          if (ext==='gif') return 'image/gif';
-          if (ext==='bmp') return 'image/bmp';
-          if (ext==='tif'||ext==='tiff') return 'image/tiff';
-          return 'image/jpeg';
-        })();
-        out.push({ name:n, bytes, fileLike:new File([bytes], n, {type:mime}) });
-      }
-      return out;
-    }
-
-    async function addImagesToQueue(files){
-      let added = 0;
-      for (const f of files){
-        const n=f.name||''; if (isBadPath(n)) continue;
-        if (!isImageName(n)) continue;
-        if (f.size === 0) continue;
-        queuedFiles.push({name:f.name,fileLike:f,bytes:await readAsUint8(f)});
-        println(`Queued <span class="fname">${sanitizeBase(f.name)}</span>`, 'var(--muted)');
-        added++;
-      }
-      return added;
-    }
-
-    async function addZipToQueue(file){
-      const imgs = await unzipFiles(file);
-      if (imgs.length === 0){
-        println(`✖ <span class="fname">${sanitizeBase(file.name)}</span> contained no images`, 'var(--err)');
-        return 0;
-      }
-      for (const e of imgs){
-        queuedFiles.push({name:e.name,fileLike:e.fileLike,bytes:e.bytes});
-      }
-      println(`Queued <span class="fname">${sanitizeBase(file.name)}</span> with ${imgs.length} image(s)`, 'var(--muted)');
-      return imgs.length;
-    }
-
-    async function handleFileList(list,{logContext}={}){
-      if (needClearOnNextQueue) { clearLog(); clearPreviewsUI(); needClearOnNextQueue = false; }
-
-      let imagesAdded = 0, zips = 0, zipsAdded = 0;
-      for (const f of list){
-        const n=f.name||'';
-        if (isBadPath(n)) continue;
-        const ext=(n.split('.').pop()||'').toLowerCase();
-        if (ext==='zip'){ zips++; zipsAdded += await addZipToQueue(f); }
-        else if (isImageName(n)){ imagesAdded += await addImagesToQueue([f]); }
-      }
-      if (imagesAdded) println(`Added ${imagesAdded} image(s)${logContext?` from ${logContext}`:''}.`, 'var(--muted)');
-      if (zips && !zipsAdded) println(`✖ ${zips} ZIP selected but contained no supported images.`, 'var(--err)');
-      updateStartVisibility();
-    }
-
-    // Inputs
-    imagesInput && imagesInput.addEventListener('change', async ()=>{ await handleFileList([...(imagesInput.files||[])], {logContext:'mobile picker'}); imagesInput.value=''; });
-    filesInput.addEventListener('change', async ()=>{ await handleFileList([...(filesInput.files||[])], {logContext:'file picker'}); filesInput.value=''; });
-    folderInput.addEventListener('change', async ()=>{ await handleFileList([...(folderInput.files||[])], {logContext:'folder picker'}); folderInput.value=''; });
-
-    // Options snapshot
-    const opts = () => ({
-      shortSide: +document.getElementById('shortSide').value || 3164,
-      borderPct: +document.getElementById('borderPct').value || 2,
-      dpi: +document.getElementById('dpi').value || 300,
-      sharpen: document.getElementById('optSharpen').checked,
-      grayscale: document.getElementById('optGray').checked,
-      strip: !document.getElementById('optNoStrip').checked,
-      srgb: !document.getElementById('optNoSRGB').checked,
-    });
-
-    // Imaging helpers
-    async function makeLabelPng(text,px){
-      await ensureLabelFont(px);
-      const cvs=document.createElement('canvas'),ctx=cvs.getContext('2d');
-      const fontSpec = `700 ${px}px "Atkinson Hyperlegible Next Mono","Atkinson Hyperlegible Next", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
-      ctx.font=fontSpec;
-      const w=Math.max(1,Math.ceil(ctx.measureText(text).width)),h=Math.max(1,Math.ceil(px*1.3));
-      cvs.width=w;cvs.height=h;
-      const ctx2=cvs.getContext('2d');
-      ctx2.font=fontSpec; ctx2.fillStyle='#000'; ctx2.textBaseline='middle'; ctx2.fillText(text,0,Math.round(h/2));
-      return new Promise(r=>cvs.toBlob(b=>r({blob:b,width:h>0?w:1,height:h>0?h:1}),'image/png'));
-    }
-    async function getDateTakenWithSource(fileLike){
-      try{
-        const exif=await exifr.parse(fileLike,{translateValues:false});
-        const dt=exif?.DateTimeOriginal||exif?.CreateDate||exif?.MediaCreateDate||exif?.TrackCreateDate;
-        if(dt instanceof Date)return{date:dt,source:'EXIF'};
-      }catch{}
-      return{date:new Date(fileLike.lastModified||Date.now()),source:'FILE'};
-    }
-    async function getImageSize(fileLike){
-      try{
-        const blob = fileLike instanceof Blob ? fileLike : new Blob([await fileLike.arrayBuffer()], {type: 'image/jpeg'});
-        const bmp=await createImageBitmap(blob); const w=bmp.width,h=bmp.height; bmp.close&&bmp.close(); return{w,h};
-      }catch{
-        try{
-          const exif = await exifr.parse(fileLike,{translateValues:false});
-          const w = exif?.PixelXDimension || exif?.ExifImageWidth || exif?.ImageWidth;
-          const h = exif?.PixelYDimension || exif?.ExifImageHeight || exif?.ImageLength;
-          if (w && h) return { w:+w, h:+h };
-        }catch{}
-      }
-      return null;
-    }
-    function outToBlob(of,mime='image/jpeg'){
-      if(of.blob instanceof Blob) return of.blob;
-      if(of.content) return new Blob([of.content],{type:mime});
-      if(of.data) return new Blob([of.data],{type:mime});
-      throw new Error('Unknown output format');
-    }
-
-    // Process one image
-    async function processOne({name,fileLike,bytes},i,total,settings){
-      const base=sanitizeBase(name);
-      const info=await getDateTakenWithSource(fileLike);
-      const date=info.date, dateSrc=info.source;
-      const label=fmtDateLabel(date);
-
-      const sz=await getImageSize(fileLike);
-      if (!sz) throw new Error('Skipped: couldn’t determine image size');
-      const {w:ow,h:oh}=sz;
-
-      const scale=settings.shortSide/Math.min(ow,oh);
-      const rw=Math.max(1,Math.round(ow*scale));
-      const rh=Math.max(1,Math.round(oh*scale));
-      const borderPx=Math.max(1,Math.round(Math.min(rw,rh)*settings.borderPct/100));
-      const pointPx=Math.max(8,Math.min(28,Math.round(borderPx*0.6)));
-      const yoff=Math.max(1,Math.round(borderPx*0.25));
-
-      const lbl=await makeLabelPng(label,pointPx);
-      const lblBytes=new Uint8Array(await lbl.blob.arrayBuffer());
-      const xpos=Math.max(0,borderPx+rw-lbl.width);
-
-      const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
-      const outName=`${y}-${m}-${d}_${base}.jpg`;
-
-      const ext=(name.split('.').pop()||'jpg').toLowerCase();
-      const inName=`in_${i}.${SUP_EXT.includes(ext)?ext:'jpg'}`;
-      const lblName=`label_${i}.png`;
-
-      const args=[
-        "convert","-quiet", inName,
-        "-auto-orient","-resize",`${settings.shortSide}x${settings.shortSide}^`,
-        ...(settings.srgb?["-colorspace","sRGB"]:[]),
-        ...(settings.grayscale?["-colorspace","Gray"]:[]),
-        ...(settings.sharpen?["-unsharp","0x1"]:[]),
-        "-bordercolor","#FFFFFF","-border",String(borderPx),
-        lblName,"-gravity","SouthWest","-geometry",`+${xpos}+${yoff}`,"-compose","over","-composite",
-        "-density",String(settings.dpi),
-        ...(settings.strip?["-strip"]:[]),
-        "-quality","100","-sampling-factor","4:4:4",
-        outName
-      ];
-
-      const inputs=[{name:inName,content:bytes},{name:lblName,content:lblBytes}];
-      const outFiles = await window.Magick.Call(inputs,args);
-      if(!outFiles||!outFiles.length) throw new Error('No output from ImageMagick');
-
-      const of = outFiles.find(f=>f.name===outName) || outFiles[0];
-      const outBlob = outToBlob(of,'image/jpeg');
-
-      // Preview card
-      const url=URL.createObjectURL(outBlob);
-      const card=document.createElement('div'); card.className='thumb';
-      const box=document.createElement('div'); box.className='box';
-      const btn=document.createElement('button'); btn.className='open'; btn.type='button';
-      const img=document.createElement('img'); img.src=url; img.alt=of.name;
-      const cap=document.createElement('div'); cap.className='cap';
-      const caption = `${of.name}  [${dateSrc} · ${label}]`;
-      cap.textContent=caption;
-      btn.appendChild(img); box.appendChild(btn); card.append(box,cap); gallery.appendChild(card);
-      if (previewSection.style.display === 'none') previewSection.style.display = 'block';
-
-      // Lightbox
-      const index = previewItems.push({ url, name: of.name, caption }) - 1;
-      btn.addEventListener('click', () => openLightbox(index));
-
-      // SUCCESS LOG
-      println(`✔ <span class="fname">${sanitizeBase(name)}</span> → <span class="fname">${of.name}</span>  [${rw}x${rh}, border ${borderPx}px, label "${label}", src=${dateSrc}]`,'var(--ok)');
-
-      setProgress(i+1,total);
-      return { name: of.name, blob: outBlob };
-    }
-
-    // Lightbox helpers
-    function openLightbox(idx){
-      if (idx < 0 || idx >= previewItems.length) return;
-      currentIndex = idx;
-      const item = previewItems[idx];
-      lbImg.src = item.url;
-      lbImg.alt = item.name;
-      lbCap.textContent = item.caption;
-      lb.classList.add('show');
-    }
-    function closeLightbox(){
-      lb.classList.remove('show');
-      lbImg.src = '';
-      currentIndex = -1;
-    }
-    function step(dir){
-      if (previewItems.length < 1) return;
-      currentIndex = (currentIndex + dir + previewItems.length) % previewItems.length;
-      const item = previewItems[currentIndex];
-      lbImg.src = item.url;
-      lbImg.alt = item.name;
-      lbCap.textContent = item.caption;
-    }
-    lbClose.addEventListener('click', closeLightbox);
-    lbPrev.addEventListener('click', ()=> step(-1));
-    lbNext.addEventListener('click', ()=> step(1));
-    document.addEventListener('keydown', (e) => {
-      if (!lb.classList.contains('show')) return;
-      if (e.key === 'Escape') closeLightbox();
-      else if (e.key === 'ArrowLeft') step(-1);
-      else if (e.key === 'ArrowRight') step(1);
-    });
-    lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
-
-    // ZIP creation
-    function zipNameToday(){
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth()+1).padStart(2,'0');
-      const d = String(now.getDate()).padStart(2,'0');
-      return `bordered-photos-${y}-${m}-${d}.zip`;
-    }
-    async function zipOutputs(files){
-      const dict={};
-      for(const f of files){
-        const ab=await f.blob.arrayBuffer();
-        dict[f.name]=new Uint8Array(ab);
-      }
-      const zipped=fflate.zipSync(dict,{level:6});
-      return new Blob([zipped],{type:'application/zip'});
-    }
-
-    // Start processing
-    const barReset = () => { barEl.style.width='0%'; };
-    startBtn.addEventListener('click', async ()=>{
-      try{
-        processing = true;
-        updateStartVisibility(); // hide start while processing
-
-        // show progress & prepare UI
-        progressWrap.style.display='block';
-        clearLog();
-        clearPreviewsUI();
-        revokeDownloadUrl();
-        dlbar.style.display='none';
-        barReset();
-
-        if (queuedFiles.length === 0){
-          println('Queue is empty. Add images or a ZIP first.','var(--warn)');
-          return;
+      // 2) Items → getAsFile (plain files)
+      const items = Array.from((dt && dt.items) ? dt.items : []);
+      for (const it of items) {
+        if (it.kind === 'file' && it.getAsFile) {
+          const f = it.getAsFile(); if (f) out.push(f);
         }
+      }
 
-        println(`Processing ${queuedFiles.length} queued image(s)…`,'var(--muted)');
-        const settings=opts();
-        filesInput.disabled=true; folderInput.disabled=true; imagesInput && (imagesInput.disabled=true);
+      // 3) Items → webkitGetAsEntry (folders in Chromium/Safari)
+      const entryTasks = [];
+      for (const it of items) {
+        const entry = it.webkitGetAsEntry && it.webkitGetAsEntry();
+        if (entry) entryTasks.push(walkEntry(entry));
+      }
+      if (entryTasks.length) {
+        const nested = await Promise.all(entryTasks);
+        nested.flat().forEach(f => out.push(f));
+      }
 
-        const outputs=[];
-        for(let i=0;i<queuedFiles.length;i++){
-          try{
-            const of=await processOne(queuedFiles[i],i,queuedFiles.length,settings);
-            outputs.push(of);
-          }catch(err){
-            console.error(err);
-            const name = sanitizeBase(queuedFiles[i]?.name || `__${i}`);
-            println(`✖ <span class="fname">${name}</span> — ${err.message || err}`,'var(--err)');
-            setProgress(i+1,queuedFiles.length);
+      // De-dupe by name+size
+      const seen = new Set();
+      const dedup = out.filter(f => { const k = (f && f.name ? f.name : 'noname') + '|' + (f && f.size ? f.size : 0); if (seen.has(k)) return false; seen.add(k); return true; });
+      dlog('gatherDroppedFiles → ' + dedup.length);
+      return dedup;
+    }
+
+    // ===== ZIP EXPANSION & FILTER =====
+    function expandZipsAndFilter(files){
+      return new Promise(function(resolve){
+        (async function(){
+          var result=[];
+          for (var i=0;i<files.length;i++){
+            var f=files[i]; var nameLower=(f.name||'').toLowerCase();
+            if (nameLower.endsWith('.zip') || f.type==='application/zip'){
+              try{
+                var zip = await JSZip.loadAsync(f);
+                var entries = Object.values(zip.files);
+                for (var j=0;j<entries.length;j++){
+                  var ent = entries[j]; if (ent.dir) continue;
+                  if (!isImageName(ent.name)) { println("<span class='err'>×<\/span> Skipped: "+escapeHtml(ent.name)+" <span class='muted'>(not an image)<\/span>"); continue; }
+                  var blob = await ent.async('blob');
+                  var f2 = new File([blob], ent.name.split('/').pop(), { type: mimeFromName(ent.name), lastModified: ent.date ? +ent.date : Date.now() });
+                  result.push(f2);
+                }
+              } catch(err){ println("<span class='err'>× failed to read zip:</span> "+escapeHtml(f.name)+" – "+escapeHtml(String(err))); }
+            } else if (isImageName(f.name)) {
+              result.push(f);
+            } else {
+              println("<span class='err'>×<\/span> Skipped: "+escapeHtml(f.name)+" <span class='muted'>(not an image)<\/span>");
+            }
           }
-        }
-
-        // Clear queue & inputs AFTER run
-        queuedFiles.length = 0;
-        filesInput.value = '';
-        folderInput.value = '';
-        if (imagesInput) imagesInput.value = '';
-        needClearOnNextQueue = true; // clear console & previews first on next queue additions
-
-        if(!outputs.length){
-          println('Nothing was produced. Check errors above.','var(--err)');
-        }else if(outputs.length===1){
-          setDownloadLink(outputs[0].blob, outputs[0].name, 'Download image');
-        }else{
-          println(`Zipping ${outputs.length} files…`,'var(--muted)');
-          const zipBlob=await zipOutputs(outputs);
-          setDownloadLink(zipBlob, zipNameToday(), 'Download ZIP with all images');
-        }
-        println('Done.','var(--ok)');
-
-      }catch(e){
-        console.error(e);
-        println('Fatal error: ' + (e.message || e),'var(--err)');
-      }finally{
-        progressWrap.style.display='none';
-        filesInput.disabled=false; folderInput.disabled=false; imagesInput && (imagesInput.disabled=false);
-        processing = false;
-        updateStartVisibility(); // will stay hidden until new files are queued
-      }
-    });
-
-    // Expose minimal read-only hooks for tests (only if test mode)
-    if (/\btest=1\b/.test(location.search) || location.hash.includes('#test')) {
-      window.__app = Object.freeze({
-        get queueSize(){ return queuedFiles.length; },
-        get isProcessing(){ return processing; },
-        get previews(){ return previewItems.slice(); },
-        clearPreviewsUI, clearLog
+          resolve(result);
+        })();
       });
     }
-  })();
-  </script>
 
-  <!-- ======= Embedded Test Harness (optional via ?test=1 or #test) ======= -->
-  <script>
-  (function(){
-    const params = new URLSearchParams(location.search);
-    const hashIsTest = location.hash.includes('#test');
-    const isTest = params.get('test') === '1' || hashIsTest;
-    if (!isTest) return;
-
-    const suitesFilter = (params.get('suite')||'').split(',').map(s=>s.trim()).filter(Boolean); // e.g. queue,processing
-    const useMocks = params.get('mocks') !== '0'; // default true
-    const sleepBase = +(params.get('sleep')||'50'); // default 50ms
-    const helpText = `
-Usage:
-  ?test=1                        Run all suites with mocks
-  ?test=1&suite=queue,processing Run only selected suites (comma-separated)
-  ?test=1&mocks=0                Disable mocks (use real libs for integration)
-  ?test=1&sleep=0                Faster tests (reduce waits)
-
-Examples:
-  # Run all with mocks
-  https://example.com/index.html?test=1
-  # Only lightbox suite, with real libs
-  https://example.com/index.html?test=1&suite=lightbox&mocks=0
-`.trim();
-
-    /* Reporter styles */
-    const css = `
-    #__test { position: fixed; right: 10px; bottom: 10px; left: 10px; max-height: 40vh;
-      overflow: auto; background: #0f1216; color: #dbe2ea; border: 1px solid #2a2f38; 
-      border-radius: 10px; padding: 10px; font: 13px/1.5 "Atkinson Hyperlegible Next", sans-serif; z-index: 99999; }
-    #__test .ok { color: #5bd67a; } #__test .fail { color: #ff6b6b; }
-    #__test .sum { margin: 6px 0; } #__test h3 { margin: 6px 0; } #__test pre { white-space: pre-wrap; }
-    #__test .suite { margin-top:8px; font-weight:700; color:#8ef0b3; }
-    `;
-    const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
-
-    /* Reporter */
-    const div = document.createElement('div'); div.id = '__test';
-    div.innerHTML = '<h3>Test Runner</h3><div class="sum"></div><div class="out"></div><pre class="help"></pre>';
-    document.body.appendChild(div);
-    const out = div.querySelector('.out'), sum = div.querySelector('.sum'), help = div.querySelector('.help');
-    let pass=0, fail=0, total=0;
-
-    function log(html, cls){ const p=document.createElement('div'); if(cls) p.className=cls; p.innerHTML=html; out.appendChild(p); }
-    function summary(){ sum.innerHTML = `Total: ${total} — <span class="ok">Passed: ${pass}</span> — <span class="fail">Failed: ${fail}</span>`; }
-    function assert(cond, msg){ total++; if(cond){ pass++; log('✔ ' + msg, 'ok'); } else { fail++; log('✖ ' + msg, 'fail'); } summary(); }
-    const ok = (v,msg)=>assert(!!v, msg||'ok');
-    const equal = (a,b,msg)=>assert(Object.is(a,b), (msg||'equal') + ` (got: ${a}, expect: ${b})`);
-    const sleep = (ms)=> new Promise(r=>setTimeout(r,ms));
-
-    const t$ = (name) => document.querySelector(`[data-test="${name}"]`);
-
-    /* Suite registry */
-    const tests = [];
-    function suite(name, fn){ tests.push({name, fn}); }
-    function wantSuite(name){ return suitesFilter.length ? suitesFilter.includes(name) : true; }
-
-    /* ---- Mocks (optional) ---- */
-    (function maybeInstallMocks(){
-      if (!useMocks) return;
-      const real = {
-        Magick: window.Magick,
-        exifr: window.exifr,
-        fflate: window.fflate,
-        createImageBitmap: window.createImageBitmap,
-        URLcreateObjectURL: URL.createObjectURL,
-        URLrevokeObjectURL: URL.revokeObjectURL,
-      };
-      window.__mocksReal = real;
-
-      function base64ToU8(b64){ const bin=atob(b64); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
-      const PNG_1x1 = base64ToU8('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO0i7lwAAAAASUVORK5CYII=');
-      const JPG_1x1 = base64ToU8('/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQEBAQEA8QEA8QEA8QEA8QEA8QEA8QFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGxAQGi0fHy AtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAAEAAQMBIgACEQEDEQH/xAAXAAEBAQEAAAAAAAAAAAAAAAAAAQID/8QAFhABAQEAAAAAAAAAAAAAAAAAABEh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCXAAf/2Q==');
-
-      window.exifr = { parse: async (file) => {
-        if ((file.name||'').includes('noexif')) return {};
-        return { DateTimeOriginal: new Date('2025-08-23T12:34:56Z') };
-      }};
-
-      window.createImageBitmap = async () => ({ width: 2000, height: 1000, close: ()=>{} });
-
-      window.fflate = {
-        unzipSync(){ return { 'imgA.jpg': JPG_1x1, 'notes.txt': new Uint8Array([1,2,3]), '__MACOSX/._junk': new Uint8Array([0]), 'dir/imgB.png': PNG_1x1 }; },
-        zipSync(dict){ let len=0; for(const k in dict) len+=dict[k].length; return new Uint8Array(len||10); }
-      };
-
-      // Add a short delay so progress bar stays visible during assertions
-      window.Magick = { Call: async (inputs,args)=>{
-        await new Promise(r=>setTimeout(r,120)); // <-- ensures visible "processing"
-        return [{ name: args[args.length-1], content: inputs[0].content }];
-      } };
-
-      let counter=0;
-      URL.createObjectURL = () => `blob:mock://${++counter}`;
-      URL.revokeObjectURL = () => {};
-    })();
-
-    /* ---------- Test Suites ---------- */
-    suite('presence', async ()=>{
-      ok(t$('dropzone'), 'dropzone exists');
-      ok(t$('start'), 'start button exists');
-      ok(t$('console'), 'console exists');
-      equal(t$('start').style.display, 'none', 'start hidden initially');
-    });
-
-    suite('queue', async ()=>{
-      const filesInput = t$('files-input');
-      // Simulate picker with two images
-      const JPG_1 = new File([new Uint8Array([1,2,3])], 'cam001.jpg', {type:'image/jpeg', lastModified: 1724412345000});
-      const PNG_1 = new File([new Uint8Array([4,5,6])], 'noexif.png', {type:'image/png', lastModified: 1724310000000});
-      Object.defineProperty(filesInput, 'files', { value: [JPG_1, PNG_1], configurable: true });
-      filesInput.dispatchEvent(new Event('change', {bubbles:true}));
-      await sleep(sleepBase);
-      ok(t$('start').style.display !== 'none', 'start shows with queue');
-    });
-
-    suite('processing', async ()=>{
-      t$('start').click();
-      await sleep(sleepBase); // after click, progress should be shown
-      equal(t$('start').style.display, 'none', 'start hidden while processing');
-      ok(document.getElementById('progressWrap').style.display !== 'none', 'progress visible');
-      await sleep(sleepBase*3);
-      ok(t$('download').textContent === 'Download image' || t$('download').textContent.includes('Download ZIP'), 'download ready');
-      ok(document.getElementById('previewSection').style.display !== 'none', 'previews visible');
-    });
-
-    suite('lightbox', async ()=>{
-      const firstBtn = document.querySelector('#gallery .thumb .box button.open');
-      ok(firstBtn, 'first preview button exists');
-      firstBtn.click();
-      await sleep(sleepBase);
-      ok(t$('lightbox').classList.contains('show'), 'lightbox opens');
-      t$('lb-next').click(); t$('lb-prev').click();
-      t$('lb-close').click();
-      await sleep(sleepBase);
-      ok(!t$('lightbox').classList.contains('show'), 'lightbox closes');
-    });
-
-    suite('postrun-refresh', async ()=>{
-      const filesInput = t$('files-input');
-      const prevLogLen = t$('console').textContent.length;
-      // Add a ZIP file (mock unzip has 2 images)
-      const zip = new File([new Uint8Array([9,9,9])], 'batch.zip', {type:'application/zip'});
-      Object.defineProperty(filesInput, 'files', { value: [zip], configurable: true });
-      filesInput.dispatchEvent(new Event('change', {bubbles:true}));
-      await sleep(sleepBase*2);
-      ok(t$('console').textContent.length <= prevLogLen || t$('console').style.display === 'block', 'console refreshed for new queue');
-
-      // Start again → old previews cleared; multiple outputs → ZIP label
-      t$('start').click();
-      await sleep(sleepBase*3);
-      const thumbs = document.querySelectorAll('#gallery .thumb');
-      ok(thumbs.length >= 1, 'new previews rendered');
-      equal(t$('download').textContent, 'Download ZIP with all images', 'ZIP label when multiple outputs');
-    });
-
-    /* --------- Runner ---------- */
-    async function run(){
-      log(`<div class="suite">Suites: ${suitesFilter.length ? suitesFilter.join(', ') : 'all'} — Mocks: ${useMocks ? 'on' : 'off'}</div>`);
-      for (const t of tests){
-        if (!wantSuite(t.name)) continue;
-        try { await t.fn(); }
-        catch(e){ assert(false, `${t.name} crashed: ${e && e.message || e}`); }
-      }
-      log('<b>Done.</b>');
-      help.textContent = helpText;
+    // ===== DATES =====
+    function getBestDate(file){
+      return new Promise(async function(resolve){
+        try{ if (window.exifr && exifr.parse){ var data = await exifr.parse(file,{tiff:true, exif:true}); var d = data && (data.DateTimeOriginal || data.CreateDate || data.ModifyDate); if (d instanceof Date && !isNaN(+d)) return resolve({date:d, source:'EXIF'}); } }catch(e){}
+        var d2 = new Date(file.lastModified || Date.now());
+        resolve({date:d2, source:'FILE'});
+      });
     }
-    window.addEventListener('load', ()=> setTimeout(run, sleepBase*3));
+
+    // ===== DECODE & RENDER =====
+    function loadAsImageBitmapOrMagick(file){
+      return new Promise(async function(resolve, reject){
+        var name = (file && file.name || '').toLowerCase();
+        var ext = name.includes('.') ? name.split('.').pop() : '';
+
+        async function sniffKind(f){
+          try{
+            const buf = await f.slice(0, 32).arrayBuffer();
+            const u8 = new Uint8Array(buf);
+            const head = String.fromCharCode.apply(null, u8);
+            // TIFF: II*  or MM *
+            if ((u8[0]===0x49&&u8[1]===0x49&&u8[2]===0x2A&&u8[3]===0x00) || (u8[0]===0x4D&&u8[1]===0x4D&&u8[2]===0x00&&u8[3]===0x2A)) return 'tiff';
+            // JPEG: FF D8
+            if (u8[0]===0xFF && u8[1]===0xD8) return 'jpeg';
+            // PNG: 89 50 4E 47
+            if (u8[0]===0x89 && u8[1]===0x50 && u8[2]===0x4E && u8[3]===0x47) return 'png';
+            // GIF: GIF8
+            if (head.startsWith('GIF8')) return 'gif';
+            // WebP: RIFF....WEBP
+            if (head.startsWith('RIFF') && head.substr(8,4)==='WEBP') return 'webp';
+            // HEIC/HEIF: 'ftyp' + brand heic/heif/mif1
+            if (head.substr(4,4)==='ftyp'){
+              const brand = head.substr(8,4);
+              if (brand==='heic' || brand==='heif' || brand==='mif1' || brand==='heix' || brand==='hevc') return 'heic';
+            }
+          }catch(e){}
+          return '';
+        }
+
+        // 1) createImageBitmap (fast path)
+        try{ var img1 = await createImageBitmap(file); dlog('decode: createImageBitmap'); return resolve({ image: img1, type: file.type || mimeFromName(file.name) }); }catch(e){ dlog('decode: createImageBitmap failed'); }
+        // 2) HTMLImageElement fallback
+        try{
+          var url = URL.createObjectURL(file);
+          var img2 = new Image();
+          img2.onload = function(){ URL.revokeObjectURL(url); dlog('decode: HTMLImageElement'); resolve({ image: img2, type: file.type || mimeFromName(file.name) }); };
+          img2.onerror = function(){ URL.revokeObjectURL(url); (async()=>{ try { await afterHtmlImgFail(); } catch(e){ reject(e); } })(); };
+          img2.src = url;
+          return; // wait for onload/onerror
+        }catch(e){ /* fall through */ }
+
+        async function afterHtmlImgFail(){
+          const kind = await sniffKind(file);
+          dlog('decode: sniff kind='+kind+' ext='+ext+' mime='+(file.type||''));
+          // 3) HEIC/HEIF-specific fallback via heic2any
+          if (((ext==='heic'||ext==='heif') || kind==='heic') && window.heic2any) {
+            try {
+              dlog('decode: heic2any fallback');
+              var outBlob = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+              var img3 = await createImageBitmap(outBlob);
+              resolve({ image: img3, type: 'image/jpeg' });
+              return;
+            } catch(e) { dlog('heic2any failed: '+String(e)); }
+          }
+          // 4) TIFF fallback via UTIF
+          if (((ext==='tif'||ext==='tiff') || kind==='tiff') && window.UTIF) {
+            try {
+              dlog('decode: UTIF fallback');
+              var buf = await file.arrayBuffer();
+              var ifds = UTIF.decode(buf);
+              if (ifds && ifds.length){
+                UTIF.decodeImage(buf, ifds[0]);
+                var rgba = UTIF.toRGBA8(ifds[0]);
+                var w = ifds[0].width || ifds[0].t256 || 0;
+                var h = ifds[0].height || ifds[0].t257 || 0;
+                if (w>0 && h>0){
+                  var cvs = document.createElement('canvas'); cvs.width=w; cvs.height=h; var ctx=cvs.getContext('2d');
+                  var imgData = ctx.createImageData(w,h); imgData.data.set(rgba); ctx.putImageData(imgData,0,0);
+                  var bmp = await createImageBitmap(cvs);
+                  resolve({ image: bmp, type: 'image/png' });
+                  return;
+                }
+              }
+            } catch(e) { dlog('UTIF failed: '+String(e)); }
+          }
+          // 5) ImageMagick WASM fallback (PNG)
+          try{
+            if (!window.initializeImageMagick) throw new Error('magick-wasm not loaded');
+            if (!window.__magickReady){ window.__magickReady = initializeImageMagick({ locateFile: function(f){ return 'https://cdn.jsdelivr.net/npm/@imagemagick/magick-wasm@0.0.35/dist/'+f; } }); }
+            await window.__magickReady;
+            var arrayBuffer = await file.arrayBuffer();
+            var pngBytes=null;
+            await new Promise(function(res, rej){ try{ ImageMagick.read(new Uint8Array(arrayBuffer), function(img){ img.autoOrient(); img.write(MagickFormat.Png, function(data){ pngBytes=data; res(); }); }); }catch(e){ rej(e); } });
+            var blob=new Blob([pngBytes],{type:'image/png'});
+            var img4 = await createImageBitmap(blob);
+            dlog('decode: ImageMagick WASM');
+            resolve({ image: img4, type:'image/png' });
+          }catch(e){ reject(new Error('Could not decode image via canvas or ImageMagick.')); }
+        }
+      });
+    }
+
+    function processOne(item){
+      return new Promise(async function(resolve){
+        var file=item.file, originName=item.originName;
+        var best = await getBestDate(file); var date=best.date, source=best.source;
+        var stamp = fmtDateForStamp(date); var datePrefix = fmtDateFileYYYYMMDD(date);
+        var decoded = await loadAsImageBitmapOrMagick(file); var image=decoded.image, type=decoded.type;
+        var w=image.width, h=image.height; var shorter=Math.min(w,h);
+        var border=Math.max(1, Math.round(0.02*shorter)); var textPx=Math.max(8, Math.round(0.5*border));
+        var canvas=document.createElement('canvas'); canvas.width=w+border*2; canvas.height=h+border*2; var ctx=canvas.getContext('2d');
+        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.drawImage(image, border, border, w, h);
+        ctx.fillStyle='#000000'; ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible Next"+', '+"Atkinson Hyperlegible"+', system-ui, sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle';
+        var xRight=border+w; var yCenterBottomBorder=canvas.height - border/2; ctx.fillText(stamp, xRight, yCenterBottomBorder);
+        var targetType=/jpe?g/i.test(originName)?'image/jpeg':(type||'image/png');
+        canvas.toBlob(function(blob){
+          var newName=datePrefix+'-'+originName; state.zip.file(newName, blob); state.processedCount++; println("<span class='ok'>✓</span> "+escapeHtml(newName)+"    <span class='muted'>"+escapeHtml(stamp)+" • "+source+"</span>"); resolve();
+        }, targetType==='image/jpeg'?'image/jpeg':'image/png', 0.92);
+      });
+    }
+
+    function handleFiles(files){
+      return new Promise(async function(resolve){
+        clearState(); showConsole();
+        var expanded = await expandZipsAndFilter(files); println(expanded.length+" images found");
+        state.queue = expanded.map(function(f){ return { file:f, originName:f.name }; });
+        for (var i=0;i<state.queue.length;i++){
+          var item = state.queue[i];
+          try { await processOne(item); } catch(err){ println("<span class='err'>×</span> "+escapeHtml(item.originName)+" <span class='muted'>"+escapeHtml(String(err))+"</span>"); }
+        }
+        var stamp=fmtNowForZipName(); var zipName='artsified-'+stamp+'.zip';
+        var blob=await state.zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:6 } });
+        var url=URL.createObjectURL(blob); state.downloadUrl=url; state.zipName=zipName;
+        addDownloadReset(url, zipName);
+        resolve();
+      });
+    }
+
+    function addDownloadReset(url, zipName){
+      var div=document.createElement('div'); div.className='line actions';
+      var aDL=document.createElement('a'); aDL.className='link'; aDL.textContent='DOWNLOAD'; aDL.href=url; aDL.download=zipName;
+      var aRS=document.createElement('a'); aRS.className='link'; aRS.textContent='RESET'; aRS.href='#'; aRS.addEventListener('click', function(e){ e.preventDefault(); resetAll(); });
+      div.appendChild(aDL); div.appendChild(document.createTextNode('   |   ')); div.appendChild(aRS);
+      logEl.appendChild(div); logEl.scrollTop=logEl.scrollHeight;
+    }
+
+    function addResetAction(){
+      var div=document.createElement('div'); div.className='line actions';
+      var aRS=document.createElement('a'); aRS.className='link'; aRS.textContent='RESET'; aRS.href='#'; aRS.addEventListener('click', function(e){ e.preventDefault(); resetAll(); });
+      div.appendChild(aRS);
+      logEl.appendChild(div); logEl.scrollTop=logEl.scrollHeight;
+    }
+
+    function resetAll(){ clearState(); showDrop(); }
+
+    // ===== DND + PICKER =====
+    function isDropzoneVisible(){ return !dropzone.classList.contains('hidden'); }
+
+    // Prevent navigation
+    window.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
+    window.addEventListener('drop', async function(e){
+      e.preventDefault(); e.stopPropagation();
+      if(!isDropzoneVisible()) return; // only handle when dropzone is shown
+      dlog('window drop');
+      var dt = e.dataTransfer || {};
+      // Prefer direct files on drop (most reliable)
+      var direct = Array.prototype.slice.call((dt.files||[]));
+      var files = direct;
+      if (!files.length && dt.items && dt.items.length){
+        // Fallback: items->getAsFile
+        files = Array.prototype.slice.call(dt.items).map(function(it){ return it.getAsFile ? it.getAsFile() : null; }).filter(Boolean);
+      }
+      if (!files.length){ files = await gatherDroppedFiles(dt); }
+      dlog('window drop collected files='+files.length);
+      if(files.length){ await handleFiles(files); }
+      else { clearState(); showConsole(); println('0 images found'); addResetAction(); }
+    }, false);
+
+    // Dropzone visuals + drop handling
+    dropzone.addEventListener('dragenter', function(e){ e.preventDefault(); dropzone.classList.add('dragover'); dlog('dropzone dragenter'); }, false);
+    dropzone.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
+    dropzone.addEventListener('dragleave', function(e){ e.preventDefault(); dropzone.classList.remove('dragover'); dlog('dropzone dragleave'); }, false);
+    dropzone.addEventListener('drop', async function(e){
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.remove('dragover'); dlog('dropzone drop');
+      var dt = e.dataTransfer || {};
+      var direct = Array.prototype.slice.call((dt.files||[]));
+      var files = direct;
+      if (!files.length && dt.items && dt.items.length){
+        files = Array.prototype.slice.call(dt.items).map(function(it){ return it.getAsFile ? it.getAsFile() : null; }).filter(Boolean);
+      }
+      if (!files.length){ files = await gatherDroppedFiles(dt); }
+      dlog('dropzone drop collected files='+files.length);
+      if(files.length){ await handleFiles(files); }
+      else { clearState(); showConsole(); println('0 images found'); addResetAction(); }
+    }, false);
+
+    // Manual picker
+    dropzone.addEventListener('click', function(){ dlog('open picker'); var input=document.createElement('input'); input.type='file'; input.multiple=true; input.webkitdirectory=true; input.setAttribute('directory',''); input.accept='.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.zip'; input.style.position='fixed'; input.style.left='-9999px'; document.body.appendChild(input); input.addEventListener('change', async function(ev){ var files=Array.prototype.slice.call(ev.target.files||[]); dlog('picker files='+files.length); if(files.length) await handleFiles(files); input.remove(); }, {once:true}); input.click(); }, false);
+
   })();
-  </script>
+</script>
+  <!-- Add HEIC/HEIF decoder fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <!-- Add HEIC/HEIF decoder fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <!-- Add TIFF decoder fallback (UTIF) -->
+  <script src="https://cdn.jsdelivr.net/npm/utif@3.0.0/UTIF.min.js"></script>
 </body>
-</html>
