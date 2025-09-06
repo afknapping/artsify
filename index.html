@@ -111,7 +111,6 @@
   <div class="app" id="app">
     <div class="dropzone" id="dropzone" tabindex="0" aria-label="Drop images, folders, or zips here">
       <p>DROP</p>
-      <!-- removed unused hidden input -->
     </div>
     <div class="console" id="console" role="log" aria-live="polite"></div>
   </div>
@@ -175,19 +174,74 @@
     function toLocalDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 
     // ===== INPUT EXPANSION =====
-    function walkEntry(entry){ return new Promise(function(resolve){ if(entry.isFile){ entry.file(function(f){ resolve([f]); }); } else if(entry.isDirectory){ var dirReader=entry.createReader(); var files=[]; var read=function(){ dirReader.readEntries(function(entries){ if(!entries.length) return resolve(files); var i=0; (function next(){ if(i>=entries.length){ read(); return; } walkEntry(entries[i++]).then(function(arr){ files = files.concat(arr); next(); }); })(); }); }; read(); } else { resolve([]); } }); }
+    function walkEntry(entry){
+      return new Promise(function(resolve){
+        if(entry.isFile){
+          entry.file(function(f){ resolve([f]); }, function(){ resolve([]); });
+        } else if(entry.isDirectory){
+          var dirReader=entry.createReader();
+          var files=[];
+          var read=function(){
+            dirReader.readEntries(function(entries){
+              if(!entries.length) return resolve(files);
+              var i=0;
+              (function next(){
+                if(i>=entries.length){ read(); return; }
+                walkEntry(entries[i++]).then(function(arr){ files = files.concat(arr); next(); });
+              })();
+            }, function(){ resolve(files); });
+          };
+          read();
+        } else {
+          resolve([]);
+        }
+      });
+    }
 
     async function gatherDroppedFiles(dt){
       const out = [];
-      const byFiles = Array.from((dt && dt.files) ? dt.files : []);
-      out.push(...byFiles);
       const items = Array.from((dt && dt.items) ? dt.items : []);
-      for (const it of items) { if (it.kind === 'file' && it.getAsFile) { const f = it.getAsFile(); if (f) out.push(f); } }
+
+      // Prefer directory expansion first
       const entryTasks = [];
-      for (const it of items) { const entry = it.webkitGetAsEntry && it.webkitGetAsEntry(); if (entry) entryTasks.push(walkEntry(entry)); }
-      if (entryTasks.length) { const nested = await Promise.all(entryTasks); nested.flat().forEach(f => out.push(f)); }
+      for (const it of items) {
+        if (it.kind === 'file' && it.webkitGetAsEntry) {
+          const entry = it.webkitGetAsEntry();
+          if (entry) entryTasks.push(walkEntry(entry));
+        }
+      }
+      if (entryTasks.length) {
+        const nested = await Promise.all(entryTasks);
+        nested.flat().forEach(f => out.push(f));
+      }
+
+      // If no files from entries, fall back to files / getAsFile
+      if (!out.length) {
+        const byFiles = Array.from((dt && dt.files) ? dt.files : []);
+        if (byFiles.length) out.push(...byFiles);
+        if (!out.length && items.length){
+          for (const it of items) {
+            if (it.kind === 'file' && it.getAsFile) {
+              const f = it.getAsFile();
+              if (f) out.push(f);
+            }
+          }
+        }
+      }
+
+      // De-dupe and ignore folder placeholders
       const seen = new Set();
-      const dedup = out.filter(f => { const k = (f && f.name ? f.name : 'noname') + '|' + (f && f.size ? f.size : 0) + '|' + (f && f.lastModified ? f.lastModified : 0); if (seen.has(k)) return false; seen.add(k); return true; });
+      const dedup = out.filter(f => {
+        const looksLikeFolder = (!f.type || f.type === '') && (!/\./.test(f.name || '')) && (!f.size || f.size === 0);
+        if (looksLikeFolder) return false;
+        const k = (f && f.name ? f.name : 'noname') + '|' + (f && f.size ? f.size : 0) + '|' + (f && f.lastModified ? f.lastModified : 0);
+        if (seen.has(k)) return false; seen.add(k); return true;
+      });
+
+      if (!dedup.length && entryTasks.length){
+        println("<span class='skip'>↷</span> <span class='muted'>Your browser didn't provide folder entries. Try clicking the drop area and selecting the folder instead.</span>");
+      }
+
       dlog('gatherDroppedFiles → ' + dedup.length);
       return dedup;
     }
@@ -205,7 +259,10 @@
                 var entries = Object.values(zip.files);
                 for (var j=0;j<entries.length;j++){
                   var ent = entries[j]; if (ent.dir) continue;
-                  if (!isImageName(ent.name)) { println("<span class='err'>×<\/span> Skipped: "+escapeHtml(ent.name)+" <span class='muted'>(not an image)<\/span>"); continue; }
+                  if (!isImageName(ent.name)) {
+                    println("<span class='err'>×<\/span> Skipped: "+escapeHtml(ent.name)+" <span class='muted'>(not an image)<\/span>");
+                    continue;
+                  }
                   var blob = await ent.async('blob');
                   var f2 = new File([blob], ent.name.split('/').pop(), { type: mimeFromName(ent.name), lastModified: ent.date ? +ent.date : Date.now() });
                   result.push(f2);
@@ -214,7 +271,11 @@
             } else if (isImageName(f.name)) {
               result.push(f);
             } else {
-              println("<span class='err'>×<\/span> Skipped: "+escapeHtml(f.name)+" <span class='muted'>(not an image)<\/span>");
+              // Likely folder placeholder; ignore silently
+              var looksLikeFolder = (!f.type || f.type === '') && (!/\./.test(f.name || '')) && (!f.size || f.size === 0);
+              if (!looksLikeFolder) {
+                println("<span class='err'>×<\/span> Skipped: "+escapeHtml(f.name)+" <span class='muted'>(not an image)<\/span>");
+              }
             }
           }
           resolve(result);
@@ -327,32 +388,15 @@
 
     // ===== EXIF ORIENTATION → canvas transform =====
     function applyOrientationTransform(ctx, orientation, w, h, ow, oh){
-      // ctx is already translated to top-left of content area (border, border)
       switch (orientation) {
-        case 2: // mirror horizontal
-          ctx.translate(ow, 0); ctx.scale(-1, 1); break;
-        case 3: // rotate 180
-          ctx.translate(ow, oh); ctx.rotate(Math.PI); break;
-        case 4: // mirror vertical
-          ctx.translate(0, oh); ctx.scale(1, -1); break;
-        case 5: // mirror horizontal + rotate 270 CW (transpose)
-          ctx.rotate(0.5 * Math.PI);
-          ctx.scale(1, -1);
-          break;
-        case 6: // rotate 90 CW
-          ctx.rotate(0.5 * Math.PI);
-          ctx.translate(0, -oh);
-          break;
-        case 7: // mirror horizontal + rotate 90 CW (transverse)
-          ctx.rotate(0.5 * Math.PI);
-          ctx.translate(ow, -oh);
-          ctx.scale(-1, 1);
-          break;
-        case 8: // rotate 90 CCW
-          ctx.rotate(-0.5 * Math.PI);
-          ctx.translate(-ow, 0);
-          break;
-        default: /* 1: no transform */ break;
+        case 2: ctx.translate(ow, 0); ctx.scale(-1, 1); break;            // mirror horizontal
+        case 3: ctx.translate(ow, oh); ctx.rotate(Math.PI); break;        // rotate 180
+        case 4: ctx.translate(0, oh); ctx.scale(1, -1); break;            // mirror vertical
+        case 5: ctx.rotate(0.5 * Math.PI); ctx.scale(1, -1); break;       // transpose
+        case 6: ctx.rotate(0.5 * Math.PI); ctx.translate(0, -oh); break;  // rotate 90 CW
+        case 7: ctx.rotate(0.5 * Math.PI); ctx.translate(ow, -oh); ctx.scale(-1, 1); break; // transverse
+        case 8: ctx.rotate(-0.5 * Math.PI); ctx.translate(-ow, 0); break; // rotate 90 CCW
+        default: break; // 1: no transform
       }
     }
 
@@ -366,7 +410,7 @@
         case 6: return 'ORI:Rotated 90° CW';
         case 7: return 'ORI:Mirrored horizontal + Rotated 90°';
         case 8: return 'ORI:Rotated 90° CCW';
-        default: return ''; // 1 -> hide
+        default: return '';
       }
     }
 
@@ -393,9 +437,9 @@
         var border=Math.max(1, Math.round(0.02*shorter));
         var textPx=Math.max(8, Math.round(0.5*border));
 
-        // size guard (optional, prevents giant crashes)
+        // size guard
         if (ow*oh > 50_000_000 || Math.max(ow, oh) > 16384) {
-          println("<span class='skip'>↷</span> "+escapeHtml(originName)+" <span class='muted'>(too large; skipped)</span>");
+          println("<span class='skip'>↷</span> "+escapeHtml(originName)+" <span class='muted'>"+escapeHtml(stamp)+" • too large; skipped</span>");
           return resolve();
         }
 
@@ -403,7 +447,7 @@
         canvas.width=ow+border*2; canvas.height=oh+border*2;
         var ctx=canvas.getContext('2d');
 
-        // white border background
+        // white border
         ctx.fillStyle='#ffffff';
         ctx.fillRect(0,0,canvas.width,canvas.height);
 
@@ -414,7 +458,7 @@
         ctx.drawImage(image, 0, 0, w, h);
         ctx.restore();
 
-        // stamp text (unrotated; bottom-right on the outer border)
+        // date stamp
         ctx.fillStyle='#000000';
         ctx.font='700 '+textPx+'px '+"Atkinson Hyperlegible"+', '+"Atkinson Hyperlegible Next"+', system-ui, sans-serif';
         ctx.textAlign='right'; ctx.textBaseline='middle';
@@ -433,21 +477,24 @@
       });
     }
 
-    function handleFiles(files){
-      return new Promise(async function(resolve){
-        clearState(); showConsole();
-        var expanded = await expandZipsAndFilter(files); println(expanded.length+" images found");
-        state.queue = expanded.map(function(f){ return { file:f, originName:f.name }; });
-        for (var i=0;i<state.queue.length;i++){
-          var item = state.queue[i];
-          try { await processOne(item); } catch(err){ println("<span class='err'>×</span> "+escapeHtml(item.originName)+" <span class='muted'>"+escapeHtml(String(err))+"</span>"); }
-        }
-        var stamp=fmtNowForZipName(); var zipName='artsified-'+stamp+'.zip';
-        var blob=await state.zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:6 } });
-        var url=URL.createObjectURL(blob); state.downloadUrl=url; state.zipName=zipName;
-        addDownloadReset(url, zipName);
-        resolve();
-      });
+    async function handleFiles(files){
+      clearState(); showConsole();
+      if (!files || !files.length){
+        println('0 images found');
+        addResetAction();
+        return;
+      }
+      var expanded = await expandZipsAndFilter(files);
+      println(expanded.length+" images found");
+      state.queue = expanded.map(function(f){ return { file:f, originName:f.name }; });
+      for (var i=0;i<state.queue.length;i++){
+        var item = state.queue[i];
+        try { await processOne(item); } catch(err){ println("<span class='err'>×</span> "+escapeHtml(item.originName)+" <span class='muted'>"+escapeHtml(String(err))+"</span>"); }
+      }
+      var stamp=fmtNowForZipName(); var zipName='artsified-'+stamp+'.zip';
+      var blob=await state.zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:6 } });
+      var url=URL.createObjectURL(blob); state.downloadUrl=url; state.zipName=zipName;
+      addDownloadReset(url, zipName);
     }
 
     function addDownloadReset(url, zipName){
@@ -470,39 +517,43 @@
     // ===== DND + PICKER =====
     function isDropzoneVisible(){ return !dropzone.classList.contains('hidden'); }
 
-    window.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
+    // Prevent navigation & set expected drop effect
+    window.addEventListener('dragover', function(e){ e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect='copy'; }, false);
+
     window.addEventListener('drop', async function(e){
       e.preventDefault(); e.stopPropagation();
       if(!isDropzoneVisible()) return;
-      dlog('window drop');
-      var dt = e.dataTransfer || {};
-      var direct = Array.prototype.slice.call((dt.files||[]));
-      var files = direct;
-      if (!files.length && dt.items && dt.items.length){
-        files = Array.prototype.slice.call(dt.items).map(function(it){ return it.getAsFile ? it.getAsFile() : null; }).filter(Boolean);
+      showConsole(); // immediate feedback
+      println("<span class='muted'>Reading items…</span>");
+      try{
+        var dt = e.dataTransfer || {};
+        var files = await gatherDroppedFiles(dt);
+        dlog('window drop collected files='+files.length);
+        await handleFiles(files);
+      } catch(err){
+        println("<span class='err'>×</span> <span class='muted'>"+escapeHtml(String(err))+"</span>");
+        addResetAction();
       }
-      if (!files.length){ files = await gatherDroppedFiles(dt); }
-      dlog('window drop collected files='+files.length);
-      if(files.length){ await handleFiles(files); }
-      else { clearState(); showConsole(); println('0 images found'); addResetAction(); }
     }, false);
 
     dropzone.addEventListener('dragenter', function(e){ e.preventDefault(); dropzone.classList.add('dragover'); dlog('dropzone dragenter'); }, false);
-    dropzone.addEventListener('dragover', function(e){ e.preventDefault(); }, false);
+    dropzone.addEventListener('dragover', function(e){ e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect='copy'; }, false);
     dropzone.addEventListener('dragleave', function(e){ e.preventDefault(); dropzone.classList.remove('dragover'); dlog('dropzone dragleave'); }, false);
+
     dropzone.addEventListener('drop', async function(e){
       e.preventDefault(); e.stopPropagation();
       dropzone.classList.remove('dragover'); dlog('dropzone drop');
-      var dt = e.dataTransfer || {};
-      var direct = Array.prototype.slice.call((dt.files||[]));
-      var files = direct;
-      if (!files.length && dt.items && dt.items.length){
-        files = Array.prototype.slice.call(dt.items).map(function(it){ return it.getAsFile ? it.getAsFile() : null; }).filter(Boolean);
+      showConsole(); // immediate feedback
+      println("<span class='muted'>Reading items…</span>");
+      try{
+        var dt = e.dataTransfer || {};
+        var files = await gatherDroppedFiles(dt);
+        dlog('dropzone drop collected files='+files.length);
+        await handleFiles(files);
+      } catch(err){
+        println("<span class='err'>×</span> <span class='muted'>"+escapeHtml(String(err))+"</span>");
+        addResetAction();
       }
-      if (!files.length){ files = await gatherDroppedFiles(dt); }
-      dlog('dropzone drop collected files='+files.length);
-      if(files.length){ await handleFiles(files); }
-      else { clearState(); showConsole(); println('0 images found'); addResetAction(); }
     }, false);
 
     // Manual picker
@@ -513,7 +564,7 @@
       input.accept='.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.zip';
       input.style.position='fixed'; input.style.left='-9999px';
       document.body.appendChild(input);
-      input.addEventListener('change', async function(ev){ var files=Array.prototype.slice.call(ev.target.files||[]); dlog('picker files='+files.length); if(files.length) await handleFiles(files); input.remove(); }, {once:true});
+      input.addEventListener('change', async function(ev){ var files=Array.prototype.slice.call(ev.target.files||[]); dlog('picker files='+files.length); await handleFiles(files); input.remove(); }, {once:true});
       input.click();
     }, false);
 
