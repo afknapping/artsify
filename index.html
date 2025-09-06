@@ -43,7 +43,7 @@
       transition: opacity .35s ease, transform .35s ease;
       z-index: 3;
     }
-    .dropzone.hidden { opacity: 0; pointer-events: none; transform: scale(0.99); }
+    .dropzone.hidden { opacity: 0; pointer-events: none; transform: scale(0.99); animation: none !important; }
     .dropzone p {
       font-family: var(--console-font);
       font-weight: 900; /* extrabold */
@@ -85,8 +85,36 @@
 
     /* Hide the helper input but keep it accessible for click */
     #fileInput { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
-
-    
+    /* ===== CRT-style subtle flicker ===== */
+    @keyframes crt-flicker {
+      0%   { opacity: 0.996; filter: brightness(1) contrast(1); }
+      50%  { opacity: 0.990; filter: brightness(1.02) contrast(1.01); }
+      100% { opacity: 0.996; filter: brightness(1) contrast(1); }
+    }
+    @keyframes crt-scan {
+      0%   { background-position: 0 0; }
+      100% { background-position: 0 8px; }
+    }
+    /* Apply gentle, fast-ish flicker to both states */
+    .console, .dropzone {
+      animation: crt-flicker 0.11s steps(2, end) infinite;
+    }
+    /* Very subtle noise/scan overlay for a tube-like feel */
+    .app::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.02) 0px,
+          rgba(255,255,255,0.02) 1px,
+          transparent 1px,
+          transparent 2px);
+      opacity: 0.06;
+      mix-blend-mode: screen;
+      animation: crt-scan 6s linear infinite;
+    }
   </style>
 </head>
 <body>
@@ -210,9 +238,9 @@
     // ===== DATES =====
     function getBestDate(file){
       return new Promise(async function(resolve){
-        try{ if (window.exifr && exifr.parse){ var data = await exifr.parse(file,{tiff:true, exif:true}); var d = data && (data.DateTimeOriginal || data.CreateDate || data.ModifyDate); if (d instanceof Date && !isNaN(+d)) return resolve({date:d, source:'EXIF'}); } }catch(e){}
+        try{ if (window.exifr && exifr.parse){ var data = await exifr.parse(file,{tiff:true, exif:true}); var d = data && (data.DateTimeOriginal || data.CreateDate || data.ModifyDate); if (d instanceof Date && !isNaN(+d)) var y=d.getUTCFullYear(), m=d.getUTCMonth(), day=d.getUTCDate(); return resolve({ date: new Date(Date.UTC(y,m,day)), source: 'EXIF' }); } }catch(e){}
         var d2 = new Date(file.lastModified || Date.now());
-        resolve({date:d2, source:'FILE'});
+        var name=(file&&file.name)||'';var digits='';for(var i=0;i<name.length;i++){var c=name[i];if(c>='0'&&c<='9')digits+=c;}if(digits.length>=8){var yy=+digits.slice(0,4),mo=+digits.slice(4,6),dd=+digits.slice(6,8);if(yy>=1900&&mo>=1&&mo<=12&&dd>=1&&dd<=31){return resolve({ date:new Date(Date.UTC(yy,mo-1,dd)), source:'NAME' });}}var d2=new Date(file&&file.lastModified?file.lastModified:Date.now());var norm=new Date(Date.UTC(d2.getUTCFullYear(),d2.getUTCMonth(),d2.getUTCDate()));resolve({ date:norm, source:'FILE' });
       });
     }
 
